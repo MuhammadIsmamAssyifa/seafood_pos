@@ -13,6 +13,10 @@ class ApiEndpoint {
   static const String menus = '/v1/catalog/menus';
   static const String stations = '/v1/catalog/stations';
 
+  // Tables
+  static const String tables = '/v1/tables';
+  static String tableDetail(dynamic id) => '/v1/tables/$id';
+
   // Orders
   static const String orders = '/v1/orders';
   static String orderDetail(dynamic id) => '/v1/orders/$id';

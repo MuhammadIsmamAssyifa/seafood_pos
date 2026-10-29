@@ -61,28 +61,21 @@ class DashboardPage extends GetView<DashboardController> {
                         const SizedBox(height: 14),
 
                         // Responsive Grid of Shortcut Menus
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final crossAxisCount = constraints.maxWidth > 700 ? 3 : 2;
-                            final aspectRatio = constraints.maxWidth > 700 ? 1.4 : 1.25;
-
-                            return GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                crossAxisSpacing: 14,
-                                mainAxisSpacing: 14,
-                                childAspectRatio: aspectRatio,
-                              ),
-                              itemCount: controller.menuList.length,
-                              itemBuilder: (context, index) {
-                                final item = controller.menuList[index];
-                                return MenuCard(
-                                  item: item,
-                                  onTap: () => controller.navigateTo(item),
-                                );
-                              },
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 220,
+                            crossAxisSpacing: 14,
+                            mainAxisSpacing: 14,
+                            childAspectRatio: 1.25,
+                          ),
+                          itemCount: controller.menuList.length,
+                          itemBuilder: (context, index) {
+                            final item = controller.menuList[index];
+                            return MenuCard(
+                              item: item,
+                              onTap: () => controller.navigateTo(item),
                             );
                           },
                         ),

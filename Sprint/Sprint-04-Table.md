@@ -4,7 +4,7 @@
 
 ## Status
 
-Planning
+Completed
 
 # Tujuan Sprint
 
@@ -377,34 +377,34 @@ Jumlah tamu harus lebih dari 0.
 
 ## Model
 
-- [ ] Create TableModel
-- [ ] Create TableStatus Enum
+- [x] Create TableModel
+- [x] Create TableStatus Enum
 
 ## Repository
 
-- [ ] Create TableRepository
-- [ ] Get Table List
-- [ ] Get Table Detail
-- [ ] Create Order
+- [x] Create TableRepository
+- [x] Get Table List
+- [x] Get Table Detail
+- [x] Create Order
 
 ## Controller
 
-- [ ] Create TableController
-- [ ] Load Tables
-- [ ] Refresh Tables
-- [ ] Create Order
+- [x] Create TableController
+- [x] Load Tables
+- [x] Refresh Tables
+- [x] Create Order
 
 ## UI
 
-- [ ] Create Table Page
-- [ ] Create Table Card
-- [ ] Create CreateOrderDialog
-- [ ] Create Table Status Badge
+- [x] Create Table Page
+- [x] Create Table Card
+- [x] Create CreateOrderDialog
+- [x] Create Table Status Badge
 
 ## Navigation
 
-- [ ] Dashboard → Table
-- [ ] Table → Order Placeholder
+- [x] Dashboard → Table
+- [x] Table → Order Placeholder
 
 ---
 

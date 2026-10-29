@@ -11,6 +11,7 @@ import '../../features/kitchen/views/kitchen_page.dart';
 import '../../features/menu/views/menu_page.dart';
 import '../../features/order/views/order_page.dart';
 import '../../features/profile/views/profile_page.dart';
+import '../../features/tables/bindings/table_binding.dart';
 import '../../features/tables/views/tables_page.dart';
 import 'app_routes.dart';
 import 'auth_middleware.dart';
@@ -42,6 +43,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.TABLES,
       page: () => const TablesPage(),
+      binding: TableBinding(),
       middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),
