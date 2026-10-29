@@ -69,8 +69,8 @@ class TableModel {
     this.activeOrder,
   });
 
-  bool get isAvailable => activeOrder == null && status == TableStatus.available;
-  bool get isOccupied => activeOrder != null || status == TableStatus.occupied;
+  bool get isAvailable => activeOrder == null && status != TableStatus.occupied;
+  bool get isOccupied => activeOrder != null;
 
   String get displayName => 'Meja $number';
 
@@ -83,10 +83,14 @@ class TableModel {
     final rawStatus = json['status']?.toString();
     final tableStatus = TableStatus.fromString(rawStatus);
 
+    final resolvedStatus = orderSummary != null
+        ? TableStatus.occupied
+        : (tableStatus == TableStatus.occupied ? TableStatus.available : tableStatus);
+
     return TableModel(
       id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       number: json['number']?.toString() ?? '${json['id']}',
-      status: orderSummary != null ? TableStatus.occupied : tableStatus,
+      status: resolvedStatus,
       outletId: json['outlet_id'] is int ? json['outlet_id'] as int : int.tryParse(json['outlet_id']?.toString() ?? ''),
       activeOrder: orderSummary,
     );

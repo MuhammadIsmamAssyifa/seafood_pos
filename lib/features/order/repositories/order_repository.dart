@@ -122,5 +122,18 @@ class OrderRepository {
       statusCode: response.statusCode,
     );
   }
+
+  /// Delete / cancel a waiting batch
+  Future<ApiResponse<bool>> deleteBatch(int batchId) async {
+    final response = await dioClient.delete(
+      ApiEndpoint.deleteBatch(batchId),
+    );
+
+    return ApiResponse<bool>.success(
+      data: true,
+      statusCode: response.statusCode,
+      message: 'Batch berhasil dibatalkan dan dihapus.',
+    );
+  }
 }
 

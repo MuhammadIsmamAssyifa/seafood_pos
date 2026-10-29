@@ -23,17 +23,17 @@ class KitchenProgressWidget extends StatelessWidget {
     switch (status.toLowerCase()) {
       case 'waiting':
       case 'draft':
-        return 0;
       case 'sent':
       case 'submitted':
-      case 'preparing':
+        return 0; // Menunggu diterima oleh dapur
       case 'cooking':
-        return 1;
+      case 'preparing':
+        return 1; // Dapur menerima & sedang memasak
       case 'ready':
-        return 2;
+        return 2; // Makanan siap disajikan
       case 'completed':
       case 'served':
-        return 3;
+        return 3; // Makanan sudah disajikan
       default:
         return 0;
     }

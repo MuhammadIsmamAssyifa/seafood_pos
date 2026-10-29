@@ -27,6 +27,12 @@ class OrderItemModel {
       ? '$menuName ($variantName)'
       : menuName;
 
+  bool get isWaiting => status.toLowerCase() == 'waiting';
+  bool get isPreparing => status.toLowerCase() == 'preparing';
+  bool get isReady => status.toLowerCase() == 'ready';
+  bool get isServed => status.toLowerCase() == 'served';
+  bool get isCancelled => status.toLowerCase() == 'cancelled';
+
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
       id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '0') ?? 0,

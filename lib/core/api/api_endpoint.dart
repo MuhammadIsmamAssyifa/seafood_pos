@@ -33,6 +33,7 @@ class ApiEndpoint {
 
   // Order Batches
   static String submitBatch(dynamic batchId) => '/v1/order-batches/$batchId/submit';
+  static String deleteBatch(dynamic batchId) => '/v1/order-batches/$batchId';
 
   // Kitchen
   static const String kitchenOrders = '/v1/kitchen/orders';

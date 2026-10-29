@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
 import '../../../core/services/pusher_service.dart';
 import '../controllers/order_controller.dart';
+import '../models/order_batch_model.dart';
 import '../widgets/batch_card.dart';
 import '../widgets/cart_item_card.dart';
 import '../widgets/order_status_badge.dart';
@@ -105,12 +107,15 @@ class OrderCartView extends GetView<OrderController> {
             }
 
             // Display grouped by Batch (Sprint 06 KDS Batch Flow)
-            if (batches.isNotEmpty) {
+            // Filter out empty waiting batches so ghost cards do not appear
+            final visibleBatches = batches.where((b) => !b.isWaiting || b.items.isNotEmpty).toList();
+
+            if (visibleBatches.isNotEmpty) {
               return ListView.builder(
                 padding: const EdgeInsets.all(14),
-                itemCount: batches.length,
+                itemCount: visibleBatches.length,
                 itemBuilder: (context, index) {
-                  final batch = batches[index];
+                  final batch = visibleBatches[index];
                   return Obx(() => BatchCard(
                         batch: batch,
                         isSubmitting: controller.isSubmitting.value,
@@ -120,6 +125,9 @@ class OrderCartView extends GetView<OrderController> {
                         mutatingItemId: controller.mutatingItemId.value,
                         onUpdateQty: (item, qty) => controller.updateItemQuantity(item, qty),
                         onDeleteItem: (item) => controller.confirmDeleteItem(item),
+                        onDeleteBatch: batch.isWaiting
+                            ? () => _confirmDeleteBatch(context, batch)
+                            : null,
                       ));
                 },
               );
@@ -158,14 +166,11 @@ class OrderCartView extends GetView<OrderController> {
               isSubmitting: controller.isSubmitting.value,
               onSubmitBatch: () => controller.submitBatchPrompt(context),
               onContinue: () {
-                Get.snackbar(
-                  'Order Diproses',
-                  'Seluruh batch sudah dikirim ke dapur. Lanjutkan ke Sprint 07 untuk pembayaran.',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: AppColors.primary,
-                  colorText: Colors.white,
-                  duration: const Duration(seconds: 3),
-                );
+                if (controller.order.value != null) {
+                  Get.toNamed(AppRoutes.PAYMENT, arguments: controller.order.value);
+                } else if (controller.orderId.value != null) {
+                  Get.toNamed(AppRoutes.PAYMENT, arguments: controller.orderId.value);
+                }
               },
             )),
       ],
@@ -244,5 +249,34 @@ class OrderCartView extends GetView<OrderController> {
         ),
       );
     });
+  }
+
+  void _confirmDeleteBatch(BuildContext context, OrderBatchModel batch) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Batalkan ${batch.displayName}?'),
+        content: Text(
+          'Seluruh item pada ${batch.displayName} yang belum dikirim ke dapur akan dihapus dari pesanan.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Kembali'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              Get.back();
+              controller.deleteBatch(batch.id);
+            },
+            child: const Text('Hapus Batch'),
+          ),
+        ],
+      ),
+    );
   }
 }

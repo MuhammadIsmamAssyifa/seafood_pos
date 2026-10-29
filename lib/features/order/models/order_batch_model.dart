@@ -23,8 +23,14 @@ class OrderBatchModel {
   bool get isSent => status.toLowerCase() == 'sent';
   bool get isCooking => status.toLowerCase() == 'cooking' || status.toLowerCase() == 'preparing';
   bool get isReady => status.toLowerCase() == 'ready';
-  bool get isServed => status.toLowerCase() == 'served' || status.toLowerCase() == 'completed';
+  bool get allItemsServed => items.isNotEmpty && items.every((i) => i.isServed);
+  bool get isServed => status.toLowerCase() == 'served' || status.toLowerCase() == 'completed' || allItemsServed;
   bool get isCancelled => status.toLowerCase() == 'cancelled';
+
+  String get effectiveStatus {
+    if (allItemsServed) return 'served';
+    return status;
+  }
 
   int get itemCount => items.fold(0, (sum, i) => sum + i.quantity.toInt());
   String get displayName => 'Batch $batchNumber';

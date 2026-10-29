@@ -77,6 +77,14 @@ class FakeSprint06Repository extends OrderRepository {
       message: 'Pesanan berhasil dikirim ke dapur.',
     );
   }
+
+  @override
+  Future<ApiResponse<bool>> deleteBatch(int batchId) async {
+    final currentBatches = List<OrderBatchModel>.from(mockOrder?.batches ?? []);
+    currentBatches.removeWhere((b) => b.id == batchId);
+    mockOrder = mockOrder?.copyWith(batches: currentBatches);
+    return ApiResponse<bool>.success(data: true, message: 'Batch berhasil dibatalkan');
+  }
 }
 
 class FakePusherService extends PusherService {

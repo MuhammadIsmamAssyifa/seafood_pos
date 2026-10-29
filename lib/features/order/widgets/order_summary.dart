@@ -146,7 +146,7 @@ class OrderSummaryWidget extends StatelessWidget {
               onPressed: onContinue,
               icon: const Icon(Icons.payment_rounded, size: 20),
               label: const Text(
-                'Lanjut Pembayaran (Sprint 07)',
+                'Lanjut ke Pembayaran',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
             ),

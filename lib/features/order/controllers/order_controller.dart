@@ -521,6 +521,37 @@ class OrderController extends GetxController {
     }
   }
 
+  /// Cancel / delete a waiting batch (e.g. additional batch cancelled by customer)
+  Future<void> deleteBatch(int batchId) async {
+    isSubmitting.value = true;
+    try {
+      final response = await orderRepository.deleteBatch(batchId);
+      if (response.success) {
+        AppHelpers.showSuccess(message: 'Batch berhasil dibatalkan');
+        if (orderId.value != null) {
+          await loadOrder(orderId.value!);
+        }
+      } else {
+        AppHelpers.showError(
+          message: response.message,
+          title: 'Gagal Membatalkan Batch',
+        );
+      }
+    } on ApiException catch (e) {
+      AppHelpers.showError(
+        message: e.firstValidationError ?? e.message,
+        title: 'Gagal Membatalkan Batch',
+      );
+    } catch (e) {
+      AppHelpers.showError(
+        message: e.toString(),
+        title: 'Error Membatalkan Batch',
+      );
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
+
   /// Total count for a menu across its variants in the current waiting cart
   int getMenuQuantityInCart(MenuModel menu) {
     final variantIds = menu.variants.map((v) => v.id).toSet();

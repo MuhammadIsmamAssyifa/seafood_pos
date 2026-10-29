@@ -14,6 +14,7 @@ class BatchCard extends StatelessWidget {
   final VoidCallback? onSubmit;
   final Function(OrderItemModel item, double newQty)? onUpdateQty;
   final Function(OrderItemModel item)? onDeleteItem;
+  final VoidCallback? onDeleteBatch;
   final int? mutatingItemId;
 
   const BatchCard({
@@ -23,6 +24,7 @@ class BatchCard extends StatelessWidget {
     this.onSubmit,
     this.onUpdateQty,
     this.onDeleteItem,
+    this.onDeleteBatch,
     this.mutatingItemId,
   });
 
@@ -88,7 +90,28 @@ class BatchCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                OrderStatusBadge(status: batch.status),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    OrderStatusBadge(status: batch.effectiveStatus),
+                    if (isWaiting && onDeleteBatch != null) ...[
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: onDeleteBatch,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.red.shade200, width: 0.8),
+                          ),
+                          child: Icon(Icons.delete_outline_rounded, size: 16, color: Colors.red.shade700),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
           ),
@@ -97,7 +120,7 @@ class BatchCard extends StatelessWidget {
           if (!isWaiting)
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
-              child: KitchenProgressWidget(status: batch.status),
+              child: KitchenProgressWidget(status: batch.effectiveStatus),
             ),
 
           // Batch Items

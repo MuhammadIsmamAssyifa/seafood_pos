@@ -54,6 +54,31 @@ class AppHelpers {
     } catch (_) {}
   }
 
+  static void showWarning({
+    required String message,
+    String title = 'Peringatan',
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    if (Get.testMode || Get.context == null) return;
+    try {
+      if (Get.isSnackbarOpen) {
+        Get.closeCurrentSnackbar();
+      }
+      Get.snackbar(
+        title,
+        message,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.warning,
+        colorText: Colors.white,
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 10,
+        duration: duration,
+        isDismissible: true,
+      );
+    } catch (_) {}
+  }
+
   static void showInfo({
     required String message,
     String title = 'Informasi',
