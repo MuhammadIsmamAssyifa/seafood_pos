@@ -1,8 +1,4 @@
-enum AppEnvironment {
-  development,
-  staging,
-  production,
-}
+enum AppEnvironment { development, staging, production }
 
 class EnvConfig {
   static AppEnvironment _environment = AppEnvironment.development;
@@ -31,8 +27,7 @@ class EnvConfig {
   static String get baseUrl {
     switch (_environment) {
       case AppEnvironment.development:
-        // By default Laragon / local Laravel server
-        return 'http://127.0.0.1:8000/api';
+        return 'http://192.168.1.200/api';
       case AppEnvironment.staging:
         return 'https://staging-api.seafood.example/api';
       case AppEnvironment.production:
@@ -43,4 +38,3 @@ class EnvConfig {
   static Duration get connectTimeout => const Duration(seconds: 30);
   static Duration get receiveTimeout => const Duration(seconds: 30);
 }
-

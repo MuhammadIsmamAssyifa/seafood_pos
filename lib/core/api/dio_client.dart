@@ -53,7 +53,7 @@ class DioClient {
         },
         onError: (DioException error, handler) async {
           if (EnvConfig.isDevelopment) {
-            _logger.e('❌ [ERROR ${error.response?.statusCode}] ${error.requestOptions.uri}\nMessage: ${error.message}\nData: ${error.response?.data}');
+            _logger.e('[ERROR ${error.response?.statusCode}] ${error.requestOptions.uri}\nMessage: ${error.message}\nData: ${error.response?.data}');
           }
 
           if (error.response?.statusCode == 401) {
