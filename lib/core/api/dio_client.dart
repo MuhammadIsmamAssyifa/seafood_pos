@@ -40,14 +40,14 @@ class DioClient {
           }
 
           if (EnvConfig.isDevelopment) {
-            _logger.d('🌐 [REQUEST] ${options.method} ${options.uri}\nHeaders: ${options.headers}\nData: ${options.data}');
+            _logger.d('[REQUEST] ${options.method} ${options.uri}\nHeaders: ${options.headers}\nData: ${options.data}');
           }
 
           return handler.next(options);
         },
         onResponse: (response, handler) {
           if (EnvConfig.isDevelopment) {
-            _logger.i('✅ [RESPONSE ${response.statusCode}] ${response.requestOptions.uri}\nData: ${response.data}');
+            _logger.i('[RESPONSE ${response.statusCode}] ${response.requestOptions.uri}\nData: ${response.data}');
           }
           return handler.next(response);
         },

@@ -4,7 +4,14 @@ import 'package:get/get.dart';
 import '../../features/auth/bindings/auth_binding.dart';
 import '../../features/auth/views/login_page.dart';
 import '../../features/auth/views/splash_page.dart';
+import '../../features/dashboard/bindings/dashboard_binding.dart';
 import '../../features/dashboard/views/dashboard_page.dart';
+import '../../features/history/views/history_page.dart';
+import '../../features/kitchen/views/kitchen_page.dart';
+import '../../features/menu/views/menu_page.dart';
+import '../../features/order/views/order_page.dart';
+import '../../features/profile/views/profile_page.dart';
+import '../../features/tables/views/tables_page.dart';
 import 'app_routes.dart';
 import 'auth_middleware.dart';
 
@@ -28,9 +35,45 @@ class AppPages {
     GetPage(
       name: AppRoutes.DASHBOARD,
       page: () => const DashboardPage(),
-      binding: AuthBinding(),
+      binding: DashboardBinding(),
       middlewares: [AuthGuard()],
       transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.TABLES,
+      page: () => const TablesPage(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.ORDER,
+      page: () => const OrderPage(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.HISTORY,
+      page: () => const HistoryPage(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.MENU,
+      page: () => const MenuPage(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.KITCHEN,
+      page: () => const KitchenPage(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.PROFILE,
+      page: () => const ProfilePage(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
     ),
   ];
 }
