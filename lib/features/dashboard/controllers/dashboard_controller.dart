@@ -60,7 +60,7 @@ class DashboardController extends GetxController {
         icon: Icons.receipt_long_rounded,
         color: Color(0xFF0D9488), // Teal
         route: AppRoutes.HISTORY,
-        badge: 'Sprint 11',
+        badge: 'Sprint 09',
       ),
       const DashboardMenuItem(
         id: 'menu',

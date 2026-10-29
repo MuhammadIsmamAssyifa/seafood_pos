@@ -14,4 +14,6 @@ abstract class AppRoutes {
   static const ADJUSTMENT_DETAIL = '/adjustment/detail';
   static const PROFILE = '/profile';
   static const HISTORY = '/history';
+  static const HISTORY_DETAIL = '/history/detail';
+  static const INVENTORY = '/inventory';
 }

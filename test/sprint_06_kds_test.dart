@@ -27,7 +27,7 @@ class FakeSprint06Repository extends OrderRepository {
   FakeSprint06Repository({required super.dioClient});
 
   @override
-  Future<ApiResponse<List<MenuModel>>> getMenus() async {
+  Future<ApiResponse<List<MenuModel>>> getMenus({bool forceRefresh = false}) async {
     return ApiResponse<List<MenuModel>>.success(data: []);
   }
 

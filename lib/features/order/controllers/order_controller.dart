@@ -127,10 +127,10 @@ class OrderController extends GetxController {
   }
 
   /// Load menu catalog from backend
-  Future<void> loadMenus() async {
+  Future<void> loadMenus({bool forceRefresh = false}) async {
     isLoadingMenu.value = true;
     try {
-      final response = await orderRepository.getMenus();
+      final response = await orderRepository.getMenus(forceRefresh: forceRefresh);
       if (response.success && response.data != null) {
         menus.assignAll(response.data!);
         _mergeDynamicCategories(response.data!);
@@ -212,7 +212,7 @@ class OrderController extends GetxController {
     if (orderId.value != null) {
       await loadOrder(orderId.value!);
     }
-    await loadMenus();
+    await loadMenus(forceRefresh: true);
   }
 
   /// Refresh order status specifically

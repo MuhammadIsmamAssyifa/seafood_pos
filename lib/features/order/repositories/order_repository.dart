@@ -11,8 +11,11 @@ class OrderRepository {
   OrderRepository({required this.dioClient});
 
   /// Get menu catalog from backend
-  Future<ApiResponse<List<MenuModel>>> getMenus() async {
-    final response = await dioClient.get(ApiEndpoint.menus);
+  Future<ApiResponse<List<MenuModel>>> getMenus({bool forceRefresh = false}) async {
+    final response = await dioClient.get(
+      ApiEndpoint.menus,
+      queryParameters: forceRefresh ? {'refresh': 1} : null,
+    );
     final responseData = response.data;
     List<MenuModel> menus = [];
 

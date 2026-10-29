@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
 import '../../../core/utils/formatter.dart';
@@ -22,6 +23,11 @@ class OrderPage extends GetView<OrderController> {
           return Text(title);
         }),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.inventory_2_outlined),
+            tooltip: 'Info Stok',
+            onPressed: () => Get.toNamed(AppRoutes.INVENTORY),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Segarkan Data',

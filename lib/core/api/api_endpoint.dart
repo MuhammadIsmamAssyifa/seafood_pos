@@ -22,6 +22,7 @@ class ApiEndpoint {
   static String orderDetail(dynamic id) => '/v1/orders/$id';
   static String orderItems(dynamic orderId) => '/v1/orders/$orderId/items';
   static String orderPayments(dynamic orderId) => '/v1/orders/$orderId/payments';
+  static String orderAdjustments(dynamic orderId) => '/v1/orders/$orderId/adjustments';
   static String paymentSummary(dynamic orderId) => '/v1/orders/$orderId/payments/summary';
 
   // Order Items & Changes

@@ -26,7 +26,7 @@ class FakeOrderRepository extends OrderRepository {
   FakeOrderRepository({required super.dioClient});
 
   @override
-  Future<ApiResponse<List<MenuModel>>> getMenus() async {
+  Future<ApiResponse<List<MenuModel>>> getMenus({bool forceRefresh = false}) async {
     if (!shouldSucceed) {
       return ApiResponse<List<MenuModel>>.failure(message: 'Error fetching menus');
     }

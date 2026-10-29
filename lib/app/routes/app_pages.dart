@@ -6,7 +6,11 @@ import '../../features/auth/views/login_page.dart';
 import '../../features/auth/views/splash_page.dart';
 import '../../features/dashboard/bindings/dashboard_binding.dart';
 import '../../features/dashboard/views/dashboard_page.dart';
+import '../../features/history/bindings/history_binding.dart';
+import '../../features/history/views/history_detail_page.dart';
 import '../../features/history/views/history_page.dart';
+import '../../features/inventory/bindings/inventory_binding.dart';
+import '../../features/inventory/views/stock_information_page.dart';
 import '../../features/kitchen/views/kitchen_page.dart';
 import '../../features/menu/views/menu_page.dart';
 import '../../features/order/bindings/order_binding.dart';
@@ -64,6 +68,14 @@ class AppPages {
     GetPage(
       name: AppRoutes.HISTORY,
       page: () => const HistoryPage(),
+      binding: HistoryBinding(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.HISTORY_DETAIL,
+      page: () => const HistoryDetailPage(),
+      binding: HistoryBinding(),
       middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),
@@ -109,6 +121,13 @@ class AppPages {
       name: AppRoutes.ADJUSTMENT_DETAIL,
       page: () => const AdjustmentDetailPage(),
       binding: OrderAdjustmentBinding(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.INVENTORY,
+      page: () => const StockInformationPage(),
+      binding: InventoryBinding(),
       middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),

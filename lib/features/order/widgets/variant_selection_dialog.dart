@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
 import '../../../core/utils/formatter.dart';
+import '../../inventory/models/stock_status.dart';
+import '../../inventory/widgets/stock_badge.dart';
+import '../../inventory/widgets/stock_warning_card.dart';
 import '../models/menu_model.dart';
 
 class VariantSelectionDialog extends StatefulWidget {
@@ -46,7 +49,7 @@ class _VariantSelectionDialogState extends State<VariantSelectionDialog> {
   void initState() {
     super.initState();
     if (widget.menu.variants.isNotEmpty) {
-      _selectedVariant = widget.menu.variants.first;
+      _selectedVariant = widget.menu.variants.firstWhereOrNull((v) => !v.isOutOfStock) ?? widget.menu.variants.first;
       if (_isWeighed) {
         _quantity = 0.7; // Sensible default for weighed seafood (like 0.7 kg etong)
       } else {
@@ -188,22 +191,30 @@ class _VariantSelectionDialogState extends State<VariantSelectionDialog> {
               const SizedBox(height: 10),
               ...widget.menu.variants.map((variant) {
                 final isChosen = _selectedVariant?.id == variant.id;
+                final isOutOfStock = variant.isOutOfStock;
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () {
-                      setState(() {
-                        _selectedVariant = variant;
-                      });
-                    },
+                    onTap: isOutOfStock
+                        ? null
+                        : () {
+                            setState(() {
+                              _selectedVariant = variant;
+                            });
+                          },
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isChosen ? AppColors.primary.withAlpha(15) : AppColors.surfaceMuted,
+                        color: isOutOfStock
+                            ? AppColors.surfaceMuted.withAlpha(120)
+                            : (isChosen ? AppColors.primary.withAlpha(15) : AppColors.surfaceMuted),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isChosen ? AppColors.primary : AppColors.border,
+                          color: isOutOfStock
+                              ? AppColors.border
+                              : (isChosen ? AppColors.primary : AppColors.border),
                           width: isChosen ? 1.5 : 1,
                         ),
                       ),
@@ -216,7 +227,9 @@ class _VariantSelectionDialogState extends State<VariantSelectionDialog> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: isChosen ? AppColors.primary : AppColors.textMuted,
+                                color: isOutOfStock
+                                    ? AppColors.border
+                                    : (isChosen ? AppColors.primary : AppColors.textMuted),
                                 width: 2,
                               ),
                             ),
@@ -225,9 +238,9 @@ class _VariantSelectionDialogState extends State<VariantSelectionDialog> {
                                     child: Container(
                                       width: 10,
                                       height: 10,
-                                      decoration: const BoxDecoration(
+                                      decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: AppColors.primary,
+                                        color: isOutOfStock ? AppColors.textMuted : AppColors.primary,
                                       ),
                                     ),
                                   )
@@ -237,11 +250,26 @@ class _VariantSelectionDialogState extends State<VariantSelectionDialog> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  variant.name,
-                                  style: AppTextStyle.bodyMedium.copyWith(
-                                    fontWeight: isChosen ? FontWeight.w700 : FontWeight.w600,
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        variant.name,
+                                        style: AppTextStyle.bodyMedium.copyWith(
+                                          fontWeight: isChosen ? FontWeight.w700 : FontWeight.w600,
+                                          color: isOutOfStock ? AppColors.textMuted : AppColors.textPrimary,
+                                          decoration: isOutOfStock ? TextDecoration.lineThrough : null,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    StockBadge(
+                                      status: variant.stockStatus,
+                                      isCompact: true,
+                                      quantity: variant.stockQuantity,
+                                      salesUnit: variant.salesUnit,
+                                    ),
+                                  ],
                                 ),
                                 if (variant.cookingMethod != null || variant.station != null) ...[
                                   const SizedBox(height: 2),
@@ -256,10 +284,11 @@ class _VariantSelectionDialogState extends State<VariantSelectionDialog> {
                               ],
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             '${AppFormatter.formatCurrency(variant.price)} / ${variant.salesUnit}',
                             style: AppTextStyle.bodyMedium.copyWith(
-                              color: AppColors.primary,
+                              color: isOutOfStock ? AppColors.textMuted : AppColors.primary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -270,6 +299,12 @@ class _VariantSelectionDialogState extends State<VariantSelectionDialog> {
                 );
               }),
               const SizedBox(height: 12),
+            ],
+
+            // Warning Card for Selected Variant
+            if (_selectedVariant != null && _selectedVariant!.stockStatus != StockStatus.available) ...[
+              StockWarningCard(status: _selectedVariant!.stockStatus),
+              const SizedBox(height: 16),
             ],
 
             // Quantity & Weight Adjuster
@@ -373,23 +408,34 @@ class _VariantSelectionDialogState extends State<VariantSelectionDialog> {
             const SizedBox(height: 24),
 
             // Add to Cart Button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: _selectedVariant == null
-                  ? null
-                  : () {
-                      Get.back();
-                      widget.onSelect(_selectedVariant!, _quantity);
-                    },
-              child: Text(
-                'Tambahkan ke Pesanan (${AppFormatter.formatCurrency((_selectedVariant?.price ?? 0) * _quantity)})',
-                style: AppTextStyle.button,
-              ),
+            Builder(
+              builder: (context) {
+                final isSelectedOutOfStock = _selectedVariant?.isOutOfStock ?? true;
+                final isDisabled = _selectedVariant == null || isSelectedOutOfStock;
+
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDisabled ? AppColors.border : AppColors.primary,
+                    foregroundColor: isDisabled ? AppColors.textMuted : Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: isDisabled
+                      ? null
+                      : () {
+                          Get.back();
+                          widget.onSelect(_selectedVariant!, _quantity);
+                        },
+                  child: Text(
+                    isSelectedOutOfStock
+                        ? 'Menu Tidak Tersedia'
+                        : 'Tambahkan ke Pesanan (${AppFormatter.formatCurrency((_selectedVariant?.price ?? 0) * _quantity)})',
+                    style: AppTextStyle.button.copyWith(
+                      color: isDisabled ? AppColors.textMuted : Colors.white,
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),

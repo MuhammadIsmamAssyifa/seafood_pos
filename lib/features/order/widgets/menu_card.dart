@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
 import '../../../core/utils/formatter.dart';
+import '../../inventory/widgets/stock_badge.dart';
 import '../models/menu_model.dart';
 
 class OrderMenuCard extends StatelessWidget {
@@ -50,6 +51,8 @@ class OrderMenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final primaryVariant = menu.primaryVariant;
     final hasMultipleVariants = menu.variants.length > 1;
+    final isOutOfStock = menu.isOutOfStock;
+
     final displayPrice = hasMultipleVariants
         ? 'Mulai ${AppFormatter.formatCurrency(menu.minPrice)}'
         : (primaryVariant != null
@@ -67,10 +70,12 @@ class OrderMenuCard extends StatelessWidget {
           width: cartQuantity > 0 ? 1.5 : 1,
         ),
       ),
-      color: cartQuantity > 0 ? AppColors.surface : AppColors.surface,
+      color: isOutOfStock
+          ? AppColors.surfaceMuted.withAlpha(120)
+          : (cartQuantity > 0 ? AppColors.surface : AppColors.surface),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: isLoading ? null : onAdd,
+        onTap: (isLoading || isOutOfStock) ? null : onAdd,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -80,7 +85,7 @@ class OrderMenuCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Icon Header with Type Badge
+                  // Icon Header with Type & Stock Badge
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -96,22 +101,13 @@ class OrderMenuCard extends StatelessWidget {
                           size: 22,
                         ),
                       ),
-                      if (stationName != null && stationName.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceMuted,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: AppColors.border, width: 0.8),
-                          ),
-                          child: Text(
-                            stationName,
-                            style: AppTextStyle.caption.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: StockBadge(
+                          status: menu.stockStatus,
+                          isCompact: true,
                         ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -126,21 +122,43 @@ class OrderMenuCard extends StatelessWidget {
                           menu.name,
                           style: AppTextStyle.titleSmall.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: isOutOfStock ? AppColors.textMuted : AppColors.textPrimary,
+                            decoration: isOutOfStock ? TextDecoration.lineThrough : null,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          hasMultipleVariants
-                              ? '${menu.variants.length} Varian'
-                              : (primaryVariant?.name ?? menu.type.toUpperCase()),
-                          style: AppTextStyle.caption.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            if (stationName != null && stationName.isNotEmpty) ...[
+                              Text(
+                                stationName,
+                                style: AppTextStyle.caption.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Text('•', style: TextStyle(color: AppColors.textMuted)),
+                              const SizedBox(width: 4),
+                            ],
+                            Expanded(
+                              child: Text(
+                                isOutOfStock
+                                    ? 'Menu tidak tersedia'
+                                    : (hasMultipleVariants
+                                        ? '${menu.variants.length} Varian'
+                                        : (primaryVariant?.name ?? menu.type.toUpperCase())),
+                                style: AppTextStyle.caption.copyWith(
+                                  color: isOutOfStock ? AppColors.error : AppColors.textSecondary,
+                                  fontWeight: isOutOfStock ? FontWeight.w600 : FontWeight.normal,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -156,16 +174,18 @@ class OrderMenuCard extends StatelessWidget {
                           displayPrice,
                           style: AppTextStyle.bodySmall.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
+                            color: isOutOfStock ? AppColors.textMuted : AppColors.primary,
                           ),
                         ),
                       ),
                       Material(
-                        color: AppColors.primary,
+                        color: isOutOfStock
+                            ? AppColors.border
+                            : AppColors.primary,
                         borderRadius: BorderRadius.circular(8),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(8),
-                          onTap: isLoading ? null : onAdd,
+                          onTap: (isLoading || isOutOfStock) ? null : onAdd,
                           child: SizedBox(
                             width: 32,
                             height: 32,
@@ -180,10 +200,14 @@ class OrderMenuCard extends StatelessWidget {
                                       ),
                                     )
                                   : Icon(
-                                      hasMultipleVariants
-                                          ? Icons.tune_rounded
-                                          : Icons.add_rounded,
-                                      color: Colors.white,
+                                      isOutOfStock
+                                          ? Icons.block_rounded
+                                          : (hasMultipleVariants
+                                              ? Icons.tune_rounded
+                                              : Icons.add_rounded),
+                                      color: isOutOfStock
+                                          ? AppColors.textMuted
+                                          : Colors.white,
                                       size: 18,
                                     ),
                             ),
