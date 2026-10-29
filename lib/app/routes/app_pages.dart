@@ -11,6 +11,9 @@ import '../../features/kitchen/views/kitchen_page.dart';
 import '../../features/menu/views/menu_page.dart';
 import '../../features/order/bindings/order_binding.dart';
 import '../../features/order/views/order_page.dart';
+import '../../features/order_adjustment/bindings/order_adjustment_binding.dart';
+import '../../features/order_adjustment/views/adjustment_detail_page.dart';
+import '../../features/order_adjustment/views/adjustment_page.dart';
 import '../../features/payment/bindings/payment_binding.dart';
 import '../../features/payment/views/payment_page.dart';
 import '../../features/payment/views/payment_success_page.dart';
@@ -94,6 +97,20 @@ class AppPages {
       page: () => const PaymentSuccessPage(),
       middlewares: [AuthGuard()],
       transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: AppRoutes.ADJUSTMENT,
+      page: () => const AdjustmentPage(),
+      binding: OrderAdjustmentBinding(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.ADJUSTMENT_DETAIL,
+      page: () => const AdjustmentDetailPage(),
+      binding: OrderAdjustmentBinding(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
     ),
   ];
 }

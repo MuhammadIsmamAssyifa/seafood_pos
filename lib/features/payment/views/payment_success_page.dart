@@ -136,7 +136,7 @@ class PaymentSuccessPage extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        '${item.quantity.toInt()}x ${item.variantName}',
+                                        '${AppFormatter.formatQuantity(item.quantity, item.unit)} ${item.variantName}',
                                         style: AppTextStyle.bodySmall,
                                       ),
                                     ),

@@ -10,6 +10,8 @@ abstract class AppRoutes {
   static const KITCHEN = '/kitchen';
   static const PAYMENT = '/payment';
   static const PAYMENT_SUCCESS = '/payment/success';
+  static const ADJUSTMENT = '/adjustment';
+  static const ADJUSTMENT_DETAIL = '/adjustment/detail';
   static const PROFILE = '/profile';
   static const HISTORY = '/history';
 }

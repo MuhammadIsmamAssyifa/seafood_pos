@@ -20,6 +20,18 @@ class AppFormatter {
     }
   }
 
+  /// Format quantity cleanly (e.g. 1, 0.7, 1.5) with optional unit (e.g. 0.7 kg)
+  static String formatQuantity(num qty, [String? unit]) {
+    final double val = qty.toDouble();
+    String qtyStr = val.truncateToDouble() == val
+        ? val.toInt().toString()
+        : val.toStringAsFixed(3).replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    if (unit != null && unit.isNotEmpty) {
+      return '$qtyStr $unit';
+    }
+    return qtyStr;
+  }
+
   /// Format DateTime to 'dd MMM yyyy'
   static String formatDate(DateTime dateTime) {
     try {

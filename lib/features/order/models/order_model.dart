@@ -34,7 +34,7 @@ class OrderModel {
     this.createdAt,
   });
 
-  int get totalItemCount => items.fold(0, (sum, item) => sum + item.quantity.toInt());
+  int get totalItemCount => items.fold(0, (sum, item) => sum + (item.quantity > 0 && item.quantity < 1.0 ? 1 : item.quantity.toInt()));
   bool get isDraft => status.toLowerCase() == 'draft';
   bool get isSubmitted => status.toLowerCase() == 'submitted';
   bool get isPreparing => status.toLowerCase() == 'preparing';

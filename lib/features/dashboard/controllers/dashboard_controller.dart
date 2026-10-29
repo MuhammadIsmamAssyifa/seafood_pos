@@ -78,6 +78,15 @@ class DashboardController extends GetxController {
         icon: Icons.kitchen_rounded,
         color: Color(0xFF7C3AED), // Purple
         route: AppRoutes.KITCHEN,
+        badge: 'KDS',
+      ),
+      const DashboardMenuItem(
+        id: 'adjustment',
+        title: 'Penyesuaian (Adjustment)',
+        subtitle: 'Konfirmasi perubahan',
+        icon: Icons.rule_rounded,
+        color: Color(0xFFE11D48), // Rose
+        route: AppRoutes.ADJUSTMENT,
         badge: 'Sprint 08',
       ),
       const DashboardMenuItem(

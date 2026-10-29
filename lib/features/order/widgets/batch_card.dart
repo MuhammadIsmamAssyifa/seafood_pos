@@ -132,11 +132,14 @@ class BatchCard extends StatelessWidget {
                 ...batch.items.map((item) {
                   if (isWaiting && onUpdateQty != null && onDeleteItem != null) {
                     // Waiting batch items can be adjusted/deleted
+                    final isWeighed = item.unit.toLowerCase() == 'kg' || item.unit.toLowerCase() == 'gram' || item.unit.toLowerCase() == 'ons';
+                    final step = isWeighed ? 0.1 : 1.0;
                     return CartItemCard(
                       item: item,
                       isMutating: mutatingItemId == item.id,
-                      onIncrement: () => onUpdateQty!(item, item.quantity + 1),
-                      onDecrement: () => onUpdateQty!(item, item.quantity - 1),
+                      onIncrement: () => onUpdateQty!(item, item.quantity + step),
+                      onDecrement: () => onUpdateQty!(item, (item.quantity - step).clamp(0.0, 9999.0)),
+                      onQuantityChanged: (newQty) => onUpdateQty!(item, newQty),
                       onDelete: () => onDeleteItem!(item),
                     );
                   }
@@ -182,7 +185,7 @@ class BatchCard extends StatelessWidget {
                                 border: Border.all(color: AppColors.border, width: 0.8),
                               ),
                               child: Text(
-                                '${item.quantity.toInt()} ${item.unit}',
+                                AppFormatter.formatQuantity(item.quantity, item.unit),
                                 style: AppTextStyle.caption.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary,

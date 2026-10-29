@@ -251,11 +251,15 @@ class OrderMenuCatalogView extends GetView<OrderController> {
       return;
     }
 
-    if (menu.variants.length == 1) {
-      // Direct add primary variant
-      controller.addItem(menu.variants.first, quantity: 1.0);
+    final primaryVariant = menu.variants.first;
+    final unitLower = primaryVariant.salesUnit.toLowerCase();
+    final isWeighed = unitLower == 'kg' || unitLower == 'gram' || unitLower == 'ons';
+
+    if (menu.variants.length == 1 && !isWeighed) {
+      // Direct add primary variant for portion/pcs
+      controller.addItem(primaryVariant, quantity: 1.0);
     } else {
-      // Multi-variant dialog
+      // Multi-variant or weighed item (kg/gram) opens selection & weight dialog
       VariantSelectionDialog.show(
         context: context,
         menu: menu,

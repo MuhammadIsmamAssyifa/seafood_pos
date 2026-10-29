@@ -48,7 +48,27 @@ class OrderCartView extends GetView<OrderController> {
                   _buildPusherLiveIndicator(),
                 ],
               ),
-              Obx(() => OrderStatusBadge(status: controller.orderStatus)),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.rule_folder_outlined, size: 20, color: AppColors.primary),
+                    tooltip: 'Penyesuaian Pesanan (Adjustment)',
+                    onPressed: () {
+                      final orderId = controller.order.value?.id;
+                      if (orderId != null) {
+                        Get.toNamed(AppRoutes.ADJUSTMENT, arguments: {
+                          'orderId': orderId,
+                          'order': controller.order.value,
+                        });
+                      } else {
+                        Get.toNamed(AppRoutes.ADJUSTMENT);
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  Obx(() => OrderStatusBadge(status: controller.orderStatus)),
+                ],
+              ),
             ],
           ),
         ),
@@ -119,9 +139,9 @@ class OrderCartView extends GetView<OrderController> {
                   return Obx(() => BatchCard(
                         batch: batch,
                         isSubmitting: controller.isSubmitting.value,
-                        onSubmit: batch.isWaiting
-                            ? () => controller.submitBatchPrompt(context, batch)
-                            : null,
+                        // onSubmit: batch.isWaiting
+                        //     ? () => controller.submitBatchPrompt(context, batch)
+                        //     : null,
                         mutatingItemId: controller.mutatingItemId.value,
                         onUpdateQty: (item, qty) => controller.updateItemQuantity(item, qty),
                         onDeleteItem: (item) => controller.confirmDeleteItem(item),
@@ -141,11 +161,14 @@ class OrderCartView extends GetView<OrderController> {
                 final item = items[index];
                 return Obx(() {
                   final isItemMutating = controller.mutatingItemId.value == item.id;
+                  final isWeighed = item.unit.toLowerCase() == 'kg' || item.unit.toLowerCase() == 'gram' || item.unit.toLowerCase() == 'ons';
+                  final step = isWeighed ? 0.1 : 1.0;
                   return CartItemCard(
                     item: item,
                     isMutating: isItemMutating,
-                    onIncrement: () => controller.updateItemQuantity(item, item.quantity + 1),
-                    onDecrement: () => controller.updateItemQuantity(item, item.quantity - 1),
+                    onIncrement: () => controller.updateItemQuantity(item, item.quantity + step),
+                    onDecrement: () => controller.updateItemQuantity(item, (item.quantity - step).clamp(0.0, 9999.0)),
+                    onQuantityChanged: (newQty) => controller.updateItemQuantity(item, newQty),
                     onDelete: () => controller.confirmDeleteItem(item),
                   );
                 });

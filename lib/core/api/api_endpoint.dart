@@ -25,6 +25,7 @@ class ApiEndpoint {
   static String paymentSummary(dynamic orderId) => '/v1/orders/$orderId/payments/summary';
 
   // Order Items & Changes
+  static const String orderItemChangesList = '/v1/order-item-changes';
   static String orderItemDetail(dynamic id) => '/v1/order-items/$id';
   static String orderItemChanges(dynamic orderItemId) => '/v1/order-items/$orderItemId/changes';
   static String orderItemReplace(dynamic orderItemId) => '/v1/order-items/$orderItemId/replace';

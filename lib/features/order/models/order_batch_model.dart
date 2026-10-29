@@ -32,7 +32,7 @@ class OrderBatchModel {
     return status;
   }
 
-  int get itemCount => items.fold(0, (sum, i) => sum + i.quantity.toInt());
+  int get itemCount => items.fold(0, (sum, i) => sum + (i.quantity > 0 && i.quantity < 1.0 ? 1 : i.quantity.toInt()));
   String get displayName => 'Batch $batchNumber';
 
   String get statusLabel {

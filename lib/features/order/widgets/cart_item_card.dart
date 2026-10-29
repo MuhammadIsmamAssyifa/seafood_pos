@@ -10,6 +10,7 @@ class CartItemCard extends StatelessWidget {
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onDelete;
+  final ValueChanged<double>? onQuantityChanged;
   final bool isMutating;
 
   const CartItemCard({
@@ -18,6 +19,7 @@ class CartItemCard extends StatelessWidget {
     required this.onIncrement,
     required this.onDecrement,
     required this.onDelete,
+    this.onQuantityChanged,
     this.isMutating = false,
   });
 
@@ -120,6 +122,7 @@ class CartItemCard extends StatelessWidget {
                 isLoading: isMutating,
                 onIncrement: onIncrement,
                 onDecrement: onDecrement,
+                onQuantityChanged: onQuantityChanged,
               ),
             ],
           ),
