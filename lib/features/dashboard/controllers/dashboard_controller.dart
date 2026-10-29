@@ -90,6 +90,24 @@ class DashboardController extends GetxController {
         badge: 'Sprint 08',
       ),
       const DashboardMenuItem(
+        id: 'inventory',
+        title: 'Informasi Stok',
+        subtitle: 'Ketersediaan bahan & pasar',
+        icon: Icons.inventory_2_rounded,
+        color: Color(0xFF059669), // Emerald
+        route: AppRoutes.INVENTORY,
+        badge: 'Sprint 10',
+      ),
+      const DashboardMenuItem(
+        id: 'report',
+        title: 'Laporan & Statistik',
+        subtitle: 'Penjualan, omzet & tren',
+        icon: Icons.bar_chart_rounded,
+        color: Color(0xFF2563EB), // Royal Blue
+        route: AppRoutes.REPORT,
+        badge: 'Sprint 11',
+      ),
+      const DashboardMenuItem(
         id: 'profile',
         title: 'Profil Kasir',
         subtitle: 'Informasi akun & shift',

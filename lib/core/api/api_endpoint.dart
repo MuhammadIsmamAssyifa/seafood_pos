@@ -46,5 +46,10 @@ class ApiEndpoint {
 
   // Reports
   static const String salesReport = '/v1/reports/sales';
+  static const String reportsDashboard = '/v1/reports/dashboard';
+  static const String reportsSales = '/v1/reports/sales';
+  static const String reportsPayments = '/v1/reports/payments';
+  static const String reportsTopMenu = '/v1/reports/top-menu';
+  static const String reportsMenuSales = '/v1/reports/menu-sales';
 }
 

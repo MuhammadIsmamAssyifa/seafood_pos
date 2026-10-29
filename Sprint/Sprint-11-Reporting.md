@@ -4,7 +4,7 @@
 
 ## Status
 
-Planning
+Completed
 
 # Tujuan Sprint
 
@@ -505,39 +505,39 @@ Tidak dapat mengambil laporan.
 
 ## Model
 
-- [ ] Create DashboardSummaryModel
-- [ ] Create SalesReportModel
-- [ ] Create PaymentSummaryModel
-- [ ] Create TopMenuModel
+- [x] Create DashboardSummaryModel
+- [x] Create SalesReportModel
+- [x] Create PaymentSummaryModel
+- [x] Create TopMenuModel
 
 ## Repository
 
-- [ ] Get Dashboard
-- [ ] Get Sales Report
-- [ ] Get Payment Summary
-- [ ] Get Top Menu
+- [x] Get Dashboard
+- [x] Get Sales Report
+- [x] Get Payment Summary
+- [x] Get Top Menu
 
 ## Controller
 
-- [ ] Load Dashboard
-- [ ] Change Filter
-- [ ] Refresh Report
+- [x] Load Dashboard
+- [x] Change Filter
+- [x] Refresh Report
 
 ## UI
 
-- [ ] Report Dashboard
-- [ ] Summary Cards
-- [ ] Sales Chart
-- [ ] Payment Chart
-- [ ] Order Statistics
-- [ ] Top Menu List
+- [x] Report Dashboard
+- [x] Summary Cards
+- [x] Sales Chart
+- [x] Payment Chart
+- [x] Order Statistics
+- [x] Top Menu List
 
 ## Integration
 
-- [ ] Dashboard API
-- [ ] Sales API
-- [ ] Payment API
-- [ ] Top Menu API
+- [x] Dashboard API
+- [x] Sales API
+- [x] Payment API
+- [x] Top Menu API
 
 ---
 

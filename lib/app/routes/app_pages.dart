@@ -22,6 +22,9 @@ import '../../features/payment/bindings/payment_binding.dart';
 import '../../features/payment/views/payment_page.dart';
 import '../../features/payment/views/payment_success_page.dart';
 import '../../features/profile/views/profile_page.dart';
+import '../../features/report/bindings/report_binding.dart';
+import '../../features/report/views/report_page.dart';
+import '../../features/report/views/sales_detail_page.dart';
 import '../../features/tables/bindings/table_binding.dart';
 import '../../features/tables/views/tables_page.dart';
 import 'app_routes.dart';
@@ -128,6 +131,20 @@ class AppPages {
       name: AppRoutes.INVENTORY,
       page: () => const StockInformationPage(),
       binding: InventoryBinding(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.REPORT,
+      page: () => const ReportPage(),
+      binding: ReportBinding(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.REPORT_SALES_DETAIL,
+      page: () => const SalesDetailPage(),
+      binding: ReportBinding(),
       middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),
