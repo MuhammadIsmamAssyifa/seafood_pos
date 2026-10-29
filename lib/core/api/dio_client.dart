@@ -57,8 +57,9 @@ class DioClient {
           }
 
           if (error.response?.statusCode == 401) {
-            // Clear expired token
+            // Clear expired token & session
             await storageService.deleteToken();
+            await storageService.clearAll();
           }
 
           final apiException = ApiException.fromDioException(error);

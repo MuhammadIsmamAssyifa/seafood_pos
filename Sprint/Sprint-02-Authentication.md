@@ -6,7 +6,7 @@
 
 ## Status
 
-Planning
+Completed
 
 # Tujuan Sprint
 
@@ -448,43 +448,43 @@ Tidak dapat terhubung ke server
 
 ## Model
 
-- [ ] Create UserModel
+- [x] Create UserModel
 
 ## Repository
 
-- [ ] Create AuthRepository
-- [ ] Implement login API
-- [ ] Implement logout API
+- [x] Create AuthRepository
+- [x] Implement login API
+- [x] Implement logout API
 
 ## Controller
 
-- [ ] Create AuthController
-- [ ] Login state
-- [ ] Logout state
-- [ ] Session checking
+- [x] Create AuthController
+- [x] Login state
+- [x] Logout state
+- [x] Session checking
 
 ## Storage
 
-- [ ] Save token
-- [ ] Read token
-- [ ] Delete token
+- [x] Save token
+- [x] Read token
+- [x] Delete token
 
 ## API
 
-- [ ] Test login endpoint
-- [ ] Setup token interceptor
+- [x] Test login endpoint
+- [x] Setup token interceptor
 
 ## UI
 
-- [ ] Create Splash Screen
-- [ ] Create Login Screen
-- [ ] Validation
+- [x] Create Splash Screen
+- [x] Create Login Screen
+- [x] Validation
 
 ## Routing
 
-- [ ] Setup auth middleware
-- [ ] Redirect authenticated user
-- [ ] Redirect guest user
+- [x] Setup auth middleware
+- [x] Redirect authenticated user
+- [x] Redirect guest user
 
 ---
 

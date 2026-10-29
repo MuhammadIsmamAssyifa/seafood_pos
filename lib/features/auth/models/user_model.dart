@@ -3,29 +3,72 @@ import '../../../shared/enums/app_enums.dart';
 class UserModel {
   final int id;
   final String name;
-  final String? username;
+  final String username;
   final String? email;
-  final UserRole role;
+  final String status;
+  final List<String> roles;
   final String? token;
 
-  UserModel({
+  const UserModel({
     required this.id,
     required this.name,
-    this.username,
+    required this.username,
     this.email,
-    required this.role,
+    this.status = 'active',
+    this.roles = const [],
     this.token,
   });
 
+  UserRole get primaryRole {
+    if (roles.isNotEmpty) {
+      return UserRole.fromString(roles.first);
+    }
+    return UserRole.unknown;
+  }
+
+  UserRole get role => primaryRole;
+
+  bool get isActive => status.toLowerCase() == 'active';
+  bool get isCashier => roles.any((r) => r.toLowerCase() == 'cashier' || r.toLowerCase() == 'kasir');
+  bool get isAdmin => roles.any((r) => r.toLowerCase() == 'admin');
+  bool get isKitchen => roles.any((r) => r.toLowerCase() == 'kitchen' || r.toLowerCase() == 'koki');
+  bool get isWaiter => roles.any((r) => r.toLowerCase() == 'waiter' || r.toLowerCase() == 'pelayan');
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // If json has nested 'data' or 'user', extract it
+    final Map<String, dynamic> data = json.containsKey('data') && json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : (json.containsKey('user') && json['user'] is Map<String, dynamic>
+            ? json['user'] as Map<String, dynamic>
+            : json);
+
+    final rawRoles = data['roles'];
+    List<String> parsedRoles = [];
+    if (rawRoles is List) {
+      parsedRoles = rawRoles.map((r) => r.toString()).toList();
+    } else if (data['role'] != null) {
+      parsedRoles = [data['role'].toString()];
+    }
+
     return UserModel(
-      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      name: json['name']?.toString() ?? '',
-      username: json['username']?.toString(),
-      email: json['email']?.toString(),
-      role: UserRole.fromString(json['role']?.toString()),
-      token: json['token']?.toString() ?? json['access_token']?.toString(),
+      id: data['id'] is int ? data['id'] as int : int.tryParse(data['id']?.toString() ?? '0') ?? 0,
+      name: data['name']?.toString() ?? '',
+      username: data['username']?.toString() ?? (data['email'] != null ? data['email'].toString().split('@').first : ''),
+      email: data['email']?.toString(),
+      status: data['status']?.toString() ?? 'active',
+      roles: parsedRoles,
+      token: json['token']?.toString() ?? data['token']?.toString(),
     );
+  }
+
+  factory UserModel.fromAuthResponse(Map<String, dynamic> json) {
+    final token = json['token']?.toString();
+    final userMap = json['user'] is Map<String, dynamic>
+        ? json['user'] as Map<String, dynamic>
+        : (json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json);
+
+    final user = UserModel.fromJson(userMap);
+    return user.copyWith(token: token);
   }
 
   Map<String, dynamic> toJson() {
@@ -34,7 +77,8 @@ class UserModel {
       'name': name,
       'username': username,
       'email': email,
-      'role': role.name,
+      'status': status,
+      'roles': roles,
       'token': token,
     };
   }
@@ -44,7 +88,8 @@ class UserModel {
     String? name,
     String? username,
     String? email,
-    UserRole? role,
+    String? status,
+    List<String>? roles,
     String? token,
   }) {
     return UserModel(
@@ -52,9 +97,9 @@ class UserModel {
       name: name ?? this.name,
       username: username ?? this.username,
       email: email ?? this.email,
-      role: role ?? this.role,
+      status: status ?? this.status,
+      roles: roles ?? this.roles,
       token: token ?? this.token,
     );
   }
 }
-

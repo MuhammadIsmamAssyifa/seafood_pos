@@ -93,10 +93,15 @@ class DashboardPage extends StatelessWidget {
                               authController.currentUser.value?.name ?? 'Kasir Restoran',
                               style: AppTextStyle.titleMedium,
                             ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${authController.currentUser.value?.primaryRole.displayName ?? 'Staff'} • ${authController.currentUser.value?.email ?? authController.currentUser.value?.username ?? ''}',
+                              style: AppTextStyle.bodySmall,
+                            ),
                             const SizedBox(height: 4),
                             Text(
                               'Shift Aktif • ${AppFormatter.formatDate(DateTime.now())}',
-                              style: AppTextStyle.bodySmall,
+                              style: AppTextStyle.caption.copyWith(color: AppColors.textMuted),
                             ),
                           ],
                         ),

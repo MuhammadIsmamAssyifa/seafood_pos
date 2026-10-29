@@ -9,21 +9,24 @@ class AppHelpers {
     String title = 'Berhasil',
     Duration duration = const Duration(seconds: 3),
   }) {
-    if (Get.isSnackbarOpen) {
-      Get.closeCurrentSnackbar();
-    }
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.success,
-      colorText: Colors.white,
-      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 10,
-      duration: duration,
-      isDismissible: true,
-    );
+    if (Get.testMode || Get.context == null) return;
+    try {
+      if (Get.isSnackbarOpen) {
+        Get.closeCurrentSnackbar();
+      }
+      Get.snackbar(
+        title,
+        message,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.success,
+        colorText: Colors.white,
+        icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 10,
+        duration: duration,
+        isDismissible: true,
+      );
+    } catch (_) {}
   }
 
   static void showError({
@@ -31,21 +34,24 @@ class AppHelpers {
     String title = 'Perhatian',
     Duration duration = const Duration(seconds: 4),
   }) {
-    if (Get.isSnackbarOpen) {
-      Get.closeCurrentSnackbar();
-    }
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.error,
-      colorText: Colors.white,
-      icon: const Icon(Icons.error_outline, color: Colors.white),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 10,
-      duration: duration,
-      isDismissible: true,
-    );
+    if (Get.testMode || Get.context == null) return;
+    try {
+      if (Get.isSnackbarOpen) {
+        Get.closeCurrentSnackbar();
+      }
+      Get.snackbar(
+        title,
+        message,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.error,
+        colorText: Colors.white,
+        icon: const Icon(Icons.error_outline, color: Colors.white),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 10,
+        duration: duration,
+        isDismissible: true,
+      );
+    } catch (_) {}
   }
 
   static void showInfo({
@@ -53,21 +59,24 @@ class AppHelpers {
     String title = 'Informasi',
     Duration duration = const Duration(seconds: 3),
   }) {
-    if (Get.isSnackbarOpen) {
-      Get.closeCurrentSnackbar();
-    }
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.info,
-      colorText: Colors.white,
-      icon: const Icon(Icons.info_outline, color: Colors.white),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 10,
-      duration: duration,
-      isDismissible: true,
-    );
+    if (Get.testMode || Get.context == null) return;
+    try {
+      if (Get.isSnackbarOpen) {
+        Get.closeCurrentSnackbar();
+      }
+      Get.snackbar(
+        title,
+        message,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.info,
+        colorText: Colors.white,
+        icon: const Icon(Icons.info_outline, color: Colors.white),
+        margin: const EdgeInsets.all(16),
+        borderRadius: 10,
+        duration: duration,
+        isDismissible: true,
+      );
+    } catch (_) {}
   }
 }
 
@@ -86,4 +95,3 @@ class Debouncer {
     _timer?.cancel();
   }
 }
-

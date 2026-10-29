@@ -27,7 +27,8 @@ class EnvConfig {
   static String get baseUrl {
     switch (_environment) {
       case AppEnvironment.development:
-        return 'http://192.168.1.200/api';
+        // Laragon default subdirectory routing
+        return 'http://192.168.1.200/seafood-system/public/api';
       case AppEnvironment.staging:
         return 'https://staging-api.seafood.example/api';
       case AppEnvironment.production:

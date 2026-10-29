@@ -13,72 +13,86 @@ class AuthRepository {
     required this.storageService,
   });
 
+  /// Login with email and password
   Future<ApiResponse<UserModel>> login({
     required String email,
     required String password,
+    String deviceName = 'pos',
   }) async {
     final response = await dioClient.post(
       ApiEndpoint.login,
       data: {
         'email': email,
         'password': password,
+        'device_name': deviceName,
       },
     );
 
     final responseData = response.data as Map<String, dynamic>;
-    final apiResponse = ApiResponse<UserModel>.fromJson(
-      responseData,
-      (json) => UserModel.fromJson(json as Map<String, dynamic>),
-      statusCode: response.statusCode,
-    );
+    final user = UserModel.fromAuthResponse(responseData);
 
-    if (apiResponse.data?.token != null) {
-      await storageService.saveToken(apiResponse.data!.token!);
-      await storageService.saveUserSession(apiResponse.data!.toJson());
+    if (user.token != null && user.token!.isNotEmpty) {
+      await storageService.saveToken(user.token!);
+      await storageService.saveUserData(user.toJson());
     }
 
-    return apiResponse;
+    return ApiResponse<UserModel>.success(
+      data: user,
+      message: responseData['message']?.toString() ?? 'Login berhasil',
+      statusCode: response.statusCode,
+    );
   }
 
+  /// Login staff with username and PIN
   Future<ApiResponse<UserModel>> staffLogin({
+    required String username,
     required String pin,
+    String deviceName = 'pos',
   }) async {
     final response = await dioClient.post(
       ApiEndpoint.staffLogin,
-      data: {'pin': pin},
+      data: {
+        'username': username,
+        'pin': pin,
+        'device_name': deviceName,
+      },
     );
 
     final responseData = response.data as Map<String, dynamic>;
-    final apiResponse = ApiResponse<UserModel>.fromJson(
-      responseData,
-      (json) => UserModel.fromJson(json as Map<String, dynamic>),
-      statusCode: response.statusCode,
-    );
+    final user = UserModel.fromAuthResponse(responseData);
 
-    if (apiResponse.data?.token != null) {
-      await storageService.saveToken(apiResponse.data!.token!);
-      await storageService.saveUserSession(apiResponse.data!.toJson());
+    if (user.token != null && user.token!.isNotEmpty) {
+      await storageService.saveToken(user.token!);
+      await storageService.saveUserData(user.toJson());
     }
 
-    return apiResponse;
+    return ApiResponse<UserModel>.success(
+      data: user,
+      message: responseData['message']?.toString() ?? 'Login staff berhasil',
+      statusCode: response.statusCode,
+    );
   }
 
+  /// Get current user profile from `/user`
   Future<ApiResponse<UserModel>> getProfile() async {
     final response = await dioClient.get(ApiEndpoint.user);
     final responseData = response.data as Map<String, dynamic>;
 
-    return ApiResponse<UserModel>.fromJson(
-      responseData,
-      (json) => UserModel.fromJson(json as Map<String, dynamic>),
+    final user = UserModel.fromJson(responseData);
+    await storageService.saveUserData(user.toJson());
+
+    return ApiResponse<UserModel>.success(
+      data: user,
       statusCode: response.statusCode,
     );
   }
 
+  /// Logout current session
   Future<void> logout() async {
     try {
       await dioClient.post(ApiEndpoint.logout);
     } catch (_) {
-      // Continue cleanup even if server logout request fails
+      // Continue cleanup even if network fails
     } finally {
       await storageService.deleteToken();
       await storageService.clearAll();
@@ -90,9 +104,9 @@ class AuthRepository {
   }
 
   Future<UserModel?> getCachedUser() async {
-    final session = await storageService.getUserSession();
-    if (session != null) {
-      return UserModel.fromJson(session);
+    final userData = await storageService.getUserData();
+    if (userData != null) {
+      return UserModel.fromJson(userData);
     }
     return null;
   }

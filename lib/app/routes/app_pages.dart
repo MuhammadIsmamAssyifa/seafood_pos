@@ -6,6 +6,7 @@ import '../../features/auth/views/login_page.dart';
 import '../../features/auth/views/splash_page.dart';
 import '../../features/dashboard/views/dashboard_page.dart';
 import 'app_routes.dart';
+import 'auth_middleware.dart';
 
 class AppPages {
   static const INITIAL = AppRoutes.SPLASH;
@@ -21,12 +22,14 @@ class AppPages {
       name: AppRoutes.LOGIN,
       page: () => const LoginPage(),
       binding: AuthBinding(),
+      middlewares: [GuestGuard()],
       transition: Transition.rightToLeftWithFade,
     ),
     GetPage(
       name: AppRoutes.DASHBOARD,
       page: () => const DashboardPage(),
       binding: AuthBinding(),
+      middlewares: [AuthGuard()],
       transition: Transition.fadeIn,
     ),
   ];
