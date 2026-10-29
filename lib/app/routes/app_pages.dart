@@ -9,6 +9,7 @@ import '../../features/dashboard/views/dashboard_page.dart';
 import '../../features/history/views/history_page.dart';
 import '../../features/kitchen/views/kitchen_page.dart';
 import '../../features/menu/views/menu_page.dart';
+import '../../features/order/bindings/order_binding.dart';
 import '../../features/order/views/order_page.dart';
 import '../../features/profile/views/profile_page.dart';
 import '../../features/tables/bindings/table_binding.dart';
@@ -50,6 +51,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.ORDER,
       page: () => const OrderPage(),
+      binding: OrderBinding(),
       middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),

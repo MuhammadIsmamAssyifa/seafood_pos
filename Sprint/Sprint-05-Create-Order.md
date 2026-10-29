@@ -4,7 +4,7 @@
 
 ## Status
 
-Planning
+Completed
 
 # Tujuan Sprint
 
@@ -464,45 +464,45 @@ Tidak dapat terhubung ke server.
 
 ## Model
 
-- [ ] Create MenuModel
-- [ ] Create OrderModel
-- [ ] Create OrderItemModel
+- [x] Create MenuModel
+- [x] Create OrderModel
+- [x] Create OrderItemModel
 
 ## Repository
 
-- [ ] Get Menu
-- [ ] Get Order
-- [ ] Add Item
-- [ ] Update Item
-- [ ] Delete Item
+- [x] Get Menu
+- [x] Get Order
+- [x] Add Item
+- [x] Update Item
+- [x] Delete Item
 
 ## Controller
 
-- [ ] Load Menu
-- [ ] Search Menu
-- [ ] Filter Category
-- [ ] Add Item
-- [ ] Update Quantity
-- [ ] Delete Item
-- [ ] Refresh Order
+- [x] Load Menu
+- [x] Search Menu
+- [x] Filter Category
+- [x] Add Item
+- [x] Update Quantity
+- [x] Delete Item
+- [x] Refresh Order
 
 ## UI
 
-- [ ] Order Page
-- [ ] Menu Grid
-- [ ] Search Bar
-- [ ] Category Filter
-- [ ] Cart
-- [ ] Order Summary
-- [ ] Quantity Selector
+- [x] Order Page
+- [x] Menu Grid
+- [x] Search Bar
+- [x] Category Filter
+- [x] Cart
+- [x] Order Summary
+- [x] Quantity Selector
 
 ## Integration
 
-- [ ] Load Menu API
-- [ ] Add Item API
-- [ ] Update Item API
-- [ ] Delete Item API
-- [ ] Refresh Order
+- [x] Load Menu API
+- [x] Add Item API
+- [x] Update Item API
+- [x] Delete Item API
+- [x] Refresh Order
 
 ---
 
