@@ -1,17 +1,25 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/api/api_exception.dart';
+import '../../../core/services/pusher_service.dart';
 import '../../../core/utils/helpers.dart';
 import '../models/menu_category.dart';
 import '../models/menu_model.dart';
+import '../models/order_batch_model.dart';
 import '../models/order_item_model.dart';
 import '../models/order_model.dart';
 import '../repositories/order_repository.dart';
+import '../widgets/submit_dialog.dart';
 
 class OrderController extends GetxController {
   final OrderRepository orderRepository;
+  final PusherService? pusherService;
 
-  OrderController({required this.orderRepository});
+  OrderController({
+    required this.orderRepository,
+    this.pusherService,
+  });
 
   // Order identifiers & summary context
   final Rxn<int> orderId = Rxn<int>();
@@ -24,7 +32,9 @@ class OrderController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isLoadingMenu = false.obs;
   final RxBool isCartMutating = false.obs;
+  final RxBool isSubmitting = false.obs;
   final Rxn<int> mutatingItemId = Rxn<int>();
+  final Rxn<int> selectedBatchId = Rxn<int>();
 
   // Catalog Data
   final RxList<MenuModel> menus = <MenuModel>[].obs;
@@ -36,12 +46,20 @@ class OrderController extends GetxController {
   // Order / Cart Data
   final Rxn<OrderModel> order = Rxn<OrderModel>();
 
+  // Realtime Pusher Subscription
+  StreamSubscription<PusherKdsEvent>? _pusherSubscription;
+
   // Computed Properties (Direct from Backend)
   List<OrderItemModel> get cartItems => order.value?.items ?? [];
+  List<OrderBatchModel> get batches => order.value?.batches ?? [];
+  OrderBatchModel? get waitingBatch => order.value?.waitingBatch;
+  bool get hasWaitingBatch => order.value?.hasWaitingBatch ?? false;
+
   double get subtotal => order.value?.subtotal ?? 0.0;
   double get discount => order.value?.discount ?? 0.0;
   double get grandTotal => order.value?.grandTotal ?? 0.0;
   int get totalItemCount => order.value?.totalItemCount ?? 0;
+  String get orderStatus => order.value?.status ?? 'draft';
   bool get isOrderDraft => order.value?.isDraft ?? true;
 
   @override
@@ -49,6 +67,7 @@ class OrderController extends GetxController {
     super.onInit();
     _extractArguments();
     _initCategories();
+    _setupPusherListener();
     initData();
   }
 
@@ -75,6 +94,24 @@ class OrderController extends GetxController {
 
   void _initCategories() {
     categories.assignAll(MenuCategory.defaultCategories);
+  }
+
+  void _setupPusherListener() {
+    final pusher = pusherService ?? (Get.isRegistered<PusherService>() ? Get.find<PusherService>() : null);
+    if (pusher != null) {
+      _pusherSubscription = pusher.onKdsEvent.listen((event) {
+        if (orderId.value == null) return;
+
+        final isMatchingOrder = event.orderId == orderId.value;
+        final isMatchingBatch = event.batchId != null &&
+            batches.any((b) => b.id == event.batchId);
+
+        if (isMatchingOrder || isMatchingBatch) {
+          // Real-time update received from Pusher -> Refresh order state
+          loadOrder(orderId.value!, isSilent: true);
+        }
+      });
+    }
   }
 
   Future<void> initData() async {
@@ -139,7 +176,7 @@ class OrderController extends GetxController {
   }
 
   /// Fetch full order details
-  Future<void> loadOrder(int id) async {
+  Future<void> loadOrder(int id, {bool isSilent = false}) async {
     try {
       final response = await orderRepository.getOrder(id);
       if (response.success && response.data != null) {
@@ -154,15 +191,19 @@ class OrderController extends GetxController {
         guestCount.value = response.data!.guestCount;
       }
     } on ApiException catch (e) {
-      AppHelpers.showError(
-        message: e.message,
-        title: 'Gagal Memuat Order',
-      );
+      if (!isSilent) {
+        AppHelpers.showError(
+          message: e.message,
+          title: 'Gagal Memuat Order',
+        );
+      }
     } catch (e) {
-      AppHelpers.showError(
-        message: e.toString(),
-        title: 'Gagal Memuat Order',
-      );
+      if (!isSilent) {
+        AppHelpers.showError(
+          message: e.toString(),
+          title: 'Gagal Memuat Order',
+        );
+      }
     }
   }
 
@@ -172,6 +213,13 @@ class OrderController extends GetxController {
       await loadOrder(orderId.value!);
     }
     await loadMenus();
+  }
+
+  /// Refresh order status specifically
+  Future<void> refreshStatus() async {
+    if (orderId.value != null) {
+      await loadOrder(orderId.value!, isSilent: true);
+    }
   }
 
   /// Category filter change
@@ -229,21 +277,22 @@ class OrderController extends GetxController {
       return;
     }
 
-    if (!isOrderDraft) {
+    if (order.value?.isCompleted == true || order.value?.isCancelled == true) {
       AppHelpers.showError(
         message: 'Order berstatus ${order.value?.status.toUpperCase()} tidak dapat diubah.',
-        title: 'Order Terkunci',
+        title: 'Order Selesai',
       );
       return;
     }
 
-    // Check if variant already exists in cart -> increment quantity instead
-    final existingItem = cartItems.firstWhereOrNull(
+    // Check if variant already exists in active waiting batch -> increment quantity instead
+    final currentWaitingBatch = waitingBatch;
+    final existingWaitingItem = currentWaitingBatch?.items.firstWhereOrNull(
       (item) => item.menuVariantId == variant.id,
     );
 
-    if (existingItem != null) {
-      await updateItemQuantity(existingItem, existingItem.quantity + quantity);
+    if (existingWaitingItem != null) {
+      await updateItemQuantity(existingWaitingItem, existingWaitingItem.quantity + quantity);
       return;
     }
 
@@ -291,10 +340,12 @@ class OrderController extends GetxController {
       return;
     }
 
-    if (!isOrderDraft) {
+    // Check if item belongs to a waiting batch
+    final batch = batches.firstWhereOrNull((b) => b.id == item.orderBatchId);
+    if (batch != null && !batch.isWaiting) {
       AppHelpers.showError(
-        message: 'Order berstatus ${order.value?.status.toUpperCase()} tidak dapat diubah.',
-        title: 'Order Terkunci',
+        message: 'Item pada ${batch.displayName} sudah terkirim ke dapur dan tidak dapat diubah langsung.',
+        title: 'Item Terkunci',
       );
       return;
     }
@@ -333,6 +384,15 @@ class OrderController extends GetxController {
 
   /// Confirm and delete item from order
   void confirmDeleteItem(OrderItemModel item) {
+    final batch = batches.firstWhereOrNull((b) => b.id == item.orderBatchId);
+    if (batch != null && !batch.isWaiting) {
+      AppHelpers.showError(
+        message: 'Item pada ${batch.displayName} sudah terkirim ke dapur dan tidak dapat dihapus.',
+        title: 'Item Terkunci',
+      );
+      return;
+    }
+
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -362,14 +422,6 @@ class OrderController extends GetxController {
 
   /// Delete item from order API
   Future<void> deleteItem(int itemId, [String? itemName]) async {
-    if (!isOrderDraft) {
-      AppHelpers.showError(
-        message: 'Order berstatus ${order.value?.status.toUpperCase()} tidak dapat diubah.',
-        title: 'Order Terkunci',
-      );
-      return;
-    }
-
     isCartMutating.value = true;
     mutatingItemId.value = itemId;
     try {
@@ -403,10 +455,77 @@ class OrderController extends GetxController {
     }
   }
 
-  /// Total count for a menu across its variants in the current cart
+  /// Submit batch to kitchen with confirmation
+  Future<void> submitBatchPrompt(BuildContext context, [OrderBatchModel? batch]) async {
+    final targetBatch = batch ?? waitingBatch;
+
+    if (targetBatch == null) {
+      AppHelpers.showInfo(
+        message: 'Semua pesanan sudah dikirim ke dapur.',
+        title: 'Tidak Ada Batch Menunggu',
+      );
+      return;
+    }
+
+    if (targetBatch.items.isEmpty) {
+      AppHelpers.showError(
+        message: 'Tidak ada item di ${targetBatch.displayName} untuk dikirim.',
+        title: 'Batch Kosong',
+      );
+      return;
+    }
+
+    SubmitOrderDialog.show(
+      context: context,
+      batchNumber: targetBatch.batchNumber,
+      itemCount: targetBatch.itemCount,
+      onConfirm: () => submitBatch(targetBatch.id),
+    );
+  }
+
+  /// Execute batch submit API
+  Future<void> submitBatch(int batchId) async {
+    isSubmitting.value = true;
+    try {
+      final response = await orderRepository.submitBatch(batchId);
+      if (response.success) {
+        AppHelpers.showSuccess(
+          message: response.message.isNotEmpty
+              ? response.message
+              : 'Pesanan berhasil dikirim ke dapur!',
+          title: 'Pesanan Dikirim',
+        );
+
+        // Refresh entire order to obtain new status, batches and timestamps
+        if (orderId.value != null) {
+          await loadOrder(orderId.value!);
+        }
+      } else {
+        AppHelpers.showError(
+          message: response.message,
+          title: 'Gagal Mengirim ke Dapur',
+        );
+      }
+    } on ApiException catch (e) {
+      AppHelpers.showError(
+        message: e.firstValidationError ?? e.message,
+        title: 'Gagal Mengirim ke Dapur',
+      );
+    } catch (e) {
+      AppHelpers.showError(
+        message: e.toString(),
+        title: 'Error Mengirim ke Dapur',
+      );
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
+
+  /// Total count for a menu across its variants in the current waiting cart
   int getMenuQuantityInCart(MenuModel menu) {
     final variantIds = menu.variants.map((v) => v.id).toSet();
     int count = 0;
+    // Count items currently in the waiting batch (or all cart items)
     for (final item in cartItems) {
       if (variantIds.contains(item.menuVariantId)) {
         count += item.quantity.toInt();
@@ -419,5 +538,10 @@ class OrderController extends GetxController {
   OrderItemModel? getCartItemForVariant(int variantId) {
     return cartItems.firstWhereOrNull((item) => item.menuVariantId == variantId);
   }
-}
 
+  @override
+  void onClose() {
+    _pusherSubscription?.cancel();
+    super.onClose();
+  }
+}

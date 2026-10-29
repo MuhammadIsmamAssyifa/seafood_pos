@@ -4,7 +4,7 @@
 
 ## Status
 
-Planning
+Completed
 
 # Tujuan Sprint
 
@@ -493,30 +493,30 @@ Tidak dapat terhubung ke server.
 
 ## Repository
 
-- [ ] Submit Batch
-- [ ] Refresh Order
-- [ ] Get Batch
+- [x] Submit Batch
+- [x] Refresh Order
+- [x] Get Batch
 
 ## Controller
 
-- [ ] Submit Batch
-- [ ] Refresh Status
-- [ ] Refresh Order
-- [ ] Handle Batch Baru
+- [x] Submit Batch
+- [x] Refresh Status
+- [x] Refresh Order
+- [x] Handle Batch Baru
 
 ## UI
 
-- [ ] Submit Button
-- [ ] Submit Dialog
-- [ ] Order Status Badge
-- [ ] Batch Card
-- [ ] Kitchen Progress
+- [x] Submit Button
+- [x] Submit Dialog
+- [x] Order Status Badge
+- [x] Batch Card
+- [x] Kitchen Progress
 
 ## Integration
 
-- [ ] Submit API
-- [ ] Refresh Order API
-- [ ] Batch API
+- [x] Submit API
+- [x] Refresh Order API
+- [x] Batch API
 
 ---
 

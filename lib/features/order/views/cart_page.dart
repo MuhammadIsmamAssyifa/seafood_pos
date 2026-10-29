@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
+import '../../../core/services/pusher_service.dart';
 import '../controllers/order_controller.dart';
+import '../widgets/batch_card.dart';
 import '../widgets/cart_item_card.dart';
+import '../widgets/order_status_badge.dart';
 import '../widgets/order_summary.dart';
 
 class OrderCartView extends GetView<OrderController> {
@@ -20,9 +23,9 @@ class OrderCartView extends GetView<OrderController> {
   Widget build(BuildContext context) {
     final content = Column(
       children: [
-        // Cart Header
+        // Cart Header with Realtime status
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: const BoxDecoration(
             color: AppColors.surface,
             border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
@@ -38,31 +41,23 @@ class OrderCartView extends GetView<OrderController> {
                     'Pesanan Meja',
                     style: AppTextStyle.titleMedium.copyWith(fontWeight: FontWeight.w700),
                   ),
+                  const SizedBox(width: 8),
+                  // Pusher Realtime Live Indicator
+                  _buildPusherLiveIndicator(),
                 ],
               ),
-              Obx(() => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withAlpha(20),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${controller.totalItemCount} Item',
-                      style: AppTextStyle.caption.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  )),
+              Obx(() => OrderStatusBadge(status: controller.orderStatus)),
             ],
           ),
         ),
 
-        // Items List
+        // Batches or Items List
         Expanded(
           child: Obx(() {
+            final batches = controller.batches;
             final items = controller.cartItems;
-            if (items.isEmpty) {
+
+            if (items.isEmpty && batches.isEmpty) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -71,7 +66,7 @@ class OrderCartView extends GetView<OrderController> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.surfaceMuted,
                           shape: BoxShape.circle,
                         ),
@@ -88,7 +83,7 @@ class OrderCartView extends GetView<OrderController> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Pilih item menu di sebelah kiri untuk menambah ke pesanan.',
+                        'Pilih item menu di katalog untuk menambah ke pesanan.',
                         style: AppTextStyle.bodySmall.copyWith(color: AppColors.textSecondary),
                         textAlign: TextAlign.center,
                       ),
@@ -109,6 +104,28 @@ class OrderCartView extends GetView<OrderController> {
               );
             }
 
+            // Display grouped by Batch (Sprint 06 KDS Batch Flow)
+            if (batches.isNotEmpty) {
+              return ListView.builder(
+                padding: const EdgeInsets.all(14),
+                itemCount: batches.length,
+                itemBuilder: (context, index) {
+                  final batch = batches[index];
+                  return Obx(() => BatchCard(
+                        batch: batch,
+                        isSubmitting: controller.isSubmitting.value,
+                        onSubmit: batch.isWaiting
+                            ? () => controller.submitBatchPrompt(context, batch)
+                            : null,
+                        mutatingItemId: controller.mutatingItemId.value,
+                        onUpdateQty: (item, qty) => controller.updateItemQuantity(item, qty),
+                        onDeleteItem: (item) => controller.confirmDeleteItem(item),
+                      ));
+                },
+              );
+            }
+
+            // Fallback flat item list if batches are not yet created
             return ListView.builder(
               padding: const EdgeInsets.all(14),
               itemCount: items.length,
@@ -129,17 +146,21 @@ class OrderCartView extends GetView<OrderController> {
           }),
         ),
 
-        // Summary and Checkout/Continue Action
+        // Summary and Submit Action
         Obx(() => OrderSummaryWidget(
               subtotal: controller.subtotal,
               discount: controller.discount,
               grandTotal: controller.grandTotal,
               totalItemCount: controller.totalItemCount,
-              isDraft: controller.isOrderDraft,
+              orderStatus: controller.orderStatus,
+              hasWaitingBatch: controller.hasWaitingBatch,
+              waitingItemCount: controller.waitingBatch?.itemCount ?? 0,
+              isSubmitting: controller.isSubmitting.value,
+              onSubmitBatch: () => controller.submitBatchPrompt(context),
               onContinue: () {
                 Get.snackbar(
-                  'Order Draft Tersimpan',
-                  'Seluruh item sudah tersimpan di backend. Lanjutkan ke Sprint 06 (KDS & Submit Kitchen).',
+                  'Order Diproses',
+                  'Seluruh batch sudah dikirim ke dapur. Lanjutkan ke Sprint 07 untuk pembayaran.',
                   snackPosition: SnackPosition.BOTTOM,
                   backgroundColor: AppColors.primary,
                   colorText: Colors.white,
@@ -159,6 +180,13 @@ class OrderCartView extends GetView<OrderController> {
                     ? 'Pesanan Meja ${controller.tableNumber.value}'
                     : 'Pesanan Aktif',
               )),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              tooltip: 'Segarkan Pesanan',
+              onPressed: () => controller.refreshOrder(),
+            ),
+          ],
         ),
         body: content,
       );
@@ -172,5 +200,49 @@ class OrderCartView extends GetView<OrderController> {
       child: content,
     );
   }
-}
 
+  Widget _buildPusherLiveIndicator() {
+    if (!Get.isRegistered<PusherService>()) return const SizedBox.shrink();
+
+    final pusher = Get.find<PusherService>();
+    return Obx(() {
+      final isOnline = pusher.isConnected.value;
+      return Tooltip(
+        message: isOnline ? 'Pusher KDS: Terhubung (Real-time)' : 'Pusher KDS: Terputus',
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: (isOnline ? AppColors.success : AppColors.error).withAlpha(20),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isOnline ? AppColors.success : AppColors.error,
+              width: 0.8,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isOnline ? AppColors.success : AppColors.error,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'LIVE',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: isOnline ? AppColors.success : AppColors.error,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+}

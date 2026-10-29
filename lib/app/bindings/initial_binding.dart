@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../core/api/dio_client.dart';
 import '../../core/services/connectivity_service.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/services/pusher_service.dart';
 import '../../core/storage/secure_storage.dart';
 import '../../features/auth/controllers/auth_controller.dart';
 import '../../features/auth/repositories/auth_repository.dart';
@@ -22,6 +23,11 @@ class InitialBinding extends Bindings {
 
     Get.put<NotificationService>(
       NotificationService(),
+      permanent: true,
+    );
+
+    Get.put<PusherService>(
+      PusherService(),
       permanent: true,
     );
 

@@ -2,6 +2,7 @@ import '../../../core/api/api_endpoint.dart';
 import '../../../core/api/api_response.dart';
 import '../../../core/api/dio_client.dart';
 import '../models/menu_model.dart';
+import '../models/order_batch_model.dart';
 import '../models/order_model.dart';
 
 class OrderRepository {
@@ -98,6 +99,26 @@ class OrderRepository {
     return ApiResponse<OrderModel>.success(
       data: order,
       message: responseData['message']?.toString() ?? 'Item dihapus',
+      statusCode: response.statusCode,
+    );
+  }
+
+  /// Submit batch to kitchen
+  Future<ApiResponse<OrderBatchModel>> submitBatch(int batchId) async {
+    final response = await dioClient.post(
+      ApiEndpoint.submitBatch(batchId),
+    );
+
+    final responseData = response.data as Map<String, dynamic>;
+    final data = responseData.containsKey('data') && responseData['data'] is Map<String, dynamic>
+        ? responseData['data'] as Map<String, dynamic>
+        : responseData;
+
+    final batch = OrderBatchModel.fromJson(data);
+
+    return ApiResponse<OrderBatchModel>.success(
+      data: batch,
+      message: responseData['message']?.toString() ?? 'Pesanan berhasil dikirim ke dapur.',
       statusCode: response.statusCode,
     );
   }

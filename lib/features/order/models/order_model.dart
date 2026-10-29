@@ -1,3 +1,4 @@
+import 'order_batch_model.dart';
 import 'order_item_model.dart';
 
 class OrderModel {
@@ -13,6 +14,7 @@ class OrderModel {
   final double grandTotal;
   final String? tableNumber;
   final List<OrderItemModel> items;
+  final List<OrderBatchModel> batches;
   final DateTime? createdAt;
 
   const OrderModel({
@@ -28,28 +30,63 @@ class OrderModel {
     this.grandTotal = 0.0,
     this.tableNumber,
     this.items = const [],
+    this.batches = const [],
     this.createdAt,
   });
 
   int get totalItemCount => items.fold(0, (sum, item) => sum + item.quantity.toInt());
   bool get isDraft => status.toLowerCase() == 'draft';
+  bool get isSubmitted => status.toLowerCase() == 'submitted';
+  bool get isPreparing => status.toLowerCase() == 'preparing';
+  bool get isReady => status.toLowerCase() == 'ready';
+  bool get isCompleted => status.toLowerCase() == 'completed';
+  bool get isCancelled => status.toLowerCase() == 'cancelled';
   bool get isEmpty => items.isEmpty;
+
+  OrderBatchModel? get waitingBatch {
+    try {
+      return batches.firstWhere((b) => b.isWaiting);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool get hasWaitingBatch => waitingBatch != null && waitingBatch!.items.isNotEmpty;
+
+  String get statusLabel {
+    switch (status.toLowerCase()) {
+      case 'draft':
+        return 'Draft';
+      case 'submitted':
+        return 'Terkirim';
+      case 'preparing':
+        return 'Dimasak';
+      case 'ready':
+        return 'Siap Saji';
+      case 'completed':
+        return 'Selesai';
+      case 'cancelled':
+        return 'Dibatalkan';
+      default:
+        return status.toUpperCase();
+    }
+  }
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> data = json.containsKey('data') && json['data'] is Map<String, dynamic>
         ? json['data'] as Map<String, dynamic>
         : json;
 
-    // Flatten items from batches
+    // Parse batches
+    List<OrderBatchModel> parsedBatches = [];
     List<OrderItemModel> extractedItems = [];
+
     if (data['batches'] is List) {
-      for (var batch in data['batches']) {
-        if (batch is Map<String, dynamic> && batch['items'] is List) {
-          for (var item in batch['items']) {
-            if (item is Map<String, dynamic>) {
-              extractedItems.add(OrderItemModel.fromJson(item));
-            }
-          }
+      for (var b in data['batches']) {
+        if (b is Map<String, dynamic>) {
+          final batchModel = OrderBatchModel.fromJson(b);
+          parsedBatches.add(batchModel);
+          extractedItems.addAll(batchModel.items);
         }
       }
     } else if (data['items'] is List) {
@@ -80,6 +117,7 @@ class OrderModel {
       grandTotal: (data['grand_total'] is num) ? (data['grand_total'] as num).toDouble() : double.tryParse(data['grand_total']?.toString() ?? '0') ?? 0.0,
       tableNumber: tableNum,
       items: extractedItems,
+      batches: parsedBatches,
       createdAt: data['created_at'] != null ? DateTime.tryParse(data['created_at'].toString()) : null,
     );
   }
@@ -98,6 +136,7 @@ class OrderModel {
       'grand_total': grandTotal,
       'table_number': tableNumber,
       'items': items.map((i) => i.toJson()).toList(),
+      'batches': batches.map((b) => b.toJson()).toList(),
       'created_at': createdAt?.toIso8601String(),
     };
   }
@@ -115,6 +154,7 @@ class OrderModel {
     double? grandTotal,
     String? tableNumber,
     List<OrderItemModel>? items,
+    List<OrderBatchModel>? batches,
     DateTime? createdAt,
   }) {
     return OrderModel(
@@ -130,8 +170,8 @@ class OrderModel {
       grandTotal: grandTotal ?? this.grandTotal,
       tableNumber: tableNumber ?? this.tableNumber,
       items: items ?? this.items,
+      batches: batches ?? this.batches,
       createdAt: createdAt ?? this.createdAt,
     );
   }
 }
-

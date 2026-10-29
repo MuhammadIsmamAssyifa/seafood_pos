@@ -31,6 +31,9 @@ class ApiEndpoint {
   static String approveItemChange(dynamic changeId) => '/v1/order-item-changes/$changeId/approve';
   static String rejectItemChange(dynamic changeId) => '/v1/order-item-changes/$changeId/reject';
 
+  // Order Batches
+  static String submitBatch(dynamic batchId) => '/v1/order-batches/$batchId/submit';
+
   // Kitchen
   static const String kitchenOrders = '/v1/kitchen/orders';
   static String acceptBatch(dynamic batchId) => '/v1/kitchen/batches/$batchId/accept';

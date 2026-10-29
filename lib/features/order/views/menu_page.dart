@@ -7,6 +7,7 @@ import '../controllers/order_controller.dart';
 import '../models/menu_model.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/menu_card.dart';
+import '../widgets/order_status_badge.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/variant_selection_dialog.dart';
 
@@ -184,32 +185,41 @@ class OrderMenuCatalogView extends GetView<OrderController> {
                 size: 20,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
-                      Text(
-                        tableNum,
-                        style: AppTextStyle.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
+                      Flexible(
+                        child: Text(
+                          tableNum,
+                          style: AppTextStyle.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withAlpha(25),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          orderNum,
-                          style: AppTextStyle.caption.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withAlpha(25),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            orderNum,
+                            style: AppTextStyle.caption.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
@@ -221,10 +231,14 @@ class OrderMenuCatalogView extends GetView<OrderController> {
                     style: AppTextStyle.caption.copyWith(
                       color: AppColors.textSecondary,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
+            OrderStatusBadge(status: controller.orderStatus),
           ],
         );
       }),

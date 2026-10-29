@@ -38,4 +38,18 @@ class EnvConfig {
 
   static Duration get connectTimeout => const Duration(seconds: 30);
   static Duration get receiveTimeout => const Duration(seconds: 30);
+
+  // Pusher Realtime Configuration
+  static String get pusherAppKey => '61bed74b5948299f3626';
+  static String get pusherCluster => 'ap1';
+  static String get pusherKdsChannel {
+    switch (_environment) {
+      case AppEnvironment.development:
+        return 'pos-seafood-kds-development';
+      case AppEnvironment.staging:
+        return 'pos-seafood-kds-staging';
+      case AppEnvironment.production:
+        return 'pos-seafood-kds-production';
+    }
+  }
 }

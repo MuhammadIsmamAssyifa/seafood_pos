@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
 import '../../../core/utils/formatter.dart';
+import 'order_status_badge.dart';
 
 class OrderSummaryWidget extends StatelessWidget {
   final double subtotal;
   final double discount;
   final double grandTotal;
   final int totalItemCount;
+  final String orderStatus;
+  final bool hasWaitingBatch;
+  final int waitingItemCount;
+  final bool isSubmitting;
+  final VoidCallback? onSubmitBatch;
   final VoidCallback? onContinue;
-  final bool isDraft;
 
   const OrderSummaryWidget({
     super.key,
@@ -17,8 +22,12 @@ class OrderSummaryWidget extends StatelessWidget {
     required this.discount,
     required this.grandTotal,
     required this.totalItemCount,
+    this.orderStatus = 'draft',
+    this.hasWaitingBatch = false,
+    this.waitingItemCount = 0,
+    this.isSubmitting = false,
+    this.onSubmitBatch,
     this.onContinue,
-    this.isDraft = true,
   });
 
   @override
@@ -48,20 +57,7 @@ class OrderSummaryWidget extends StatelessWidget {
                 'Ringkasan Pesanan',
                 style: AppTextStyle.titleSmall.copyWith(fontWeight: FontWeight.w700),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDraft ? AppColors.warning.withAlpha(30) : AppColors.success.withAlpha(30),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  isDraft ? 'DRAFT' : 'PROCESSED',
-                  style: AppTextStyle.caption.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: isDraft ? AppColors.warning : AppColors.success,
-                  ),
-                ),
-              ),
+              OrderStatusBadge(status: orderStatus),
             ],
           ),
           const SizedBox(height: 12),
@@ -113,19 +109,44 @@ class OrderSummaryWidget extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
-          // Continue / Status Action
-          if (onContinue != null)
+          // Action Button
+          if (hasWaitingBatch && onSubmitBatch != null)
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.secondary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: isSubmitting ? null : onSubmitBatch,
+              icon: isSubmitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.soup_kitchen_rounded, size: 20),
+              label: Text(
+                isSubmitting
+                    ? 'Mengirim ke Dapur...'
+                    : 'Kirim ke Dapur ($waitingItemCount Item)',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            )
+          else if (onContinue != null && totalItemCount > 0)
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
+                minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              onPressed: totalItemCount > 0 ? onContinue : null,
-              icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+              onPressed: onContinue,
+              icon: const Icon(Icons.payment_rounded, size: 20),
               label: const Text(
-                'Lanjutkan (Sprint 06: Kitchen)',
+                'Lanjut Pembayaran (Sprint 07)',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
             ),
@@ -155,4 +176,3 @@ class OrderSummaryWidget extends StatelessWidget {
     );
   }
 }
-
