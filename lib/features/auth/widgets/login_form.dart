@@ -8,10 +8,7 @@ import '../../../core/widgets/app_text_field.dart';
 import '../controllers/auth_controller.dart';
 import 'password_field.dart';
 
-enum LoginMode {
-  staffPin,
-  emailPassword,
-}
+enum LoginMode { staffPin, emailPassword }
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -118,11 +115,18 @@ class _LoginFormState extends State<LoginForm> {
               decoration: BoxDecoration(
                 color: AppColors.error.withAlpha(20),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.error.withAlpha(80), width: 1),
+                border: Border.all(
+                  color: AppColors.error.withAlpha(80),
+                  width: 1,
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: AppColors.error,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -145,7 +149,10 @@ class _LoginFormState extends State<LoginForm> {
               label: 'Username Staff',
               hint: 'Contoh: kasir1 / pelayan1',
               prefixIcon: const Icon(Icons.person_outline, size: 20),
-              validator: (val) => AppValidators.requiredField(val, message: 'Username staff wajib diisi'),
+              validator: (val) => AppValidators.requiredField(
+                val,
+                message: 'Username staff wajib diisi',
+              ),
             ),
             const SizedBox(height: 16),
             PasswordField(
@@ -184,7 +191,7 @@ class _LoginFormState extends State<LoginForm> {
           // Submit Button
           Obx(
             () => AppButton(
-              text: _selectedMode == LoginMode.staffPin ? 'Masuk dengan PIN' : 'Masuk Sistem',
+              text: 'Masuk',
               isLoading: _authController.isLoading.value,
               onPressed: _submit,
             ),
@@ -234,7 +241,9 @@ class _LoginFormState extends State<LoginForm> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyle.caption.copyWith(
-                  color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
@@ -245,4 +254,3 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 }
-

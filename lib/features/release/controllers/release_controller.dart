@@ -4,6 +4,7 @@ import '../../auth/controllers/auth_controller.dart';
 import '../../order/models/order_model.dart';
 import '../../payment/models/payment_model.dart';
 import '../../payment/models/payment_summary_model.dart';
+import '../models/receipt_config_model.dart';
 import '../services/connectivity_service.dart';
 import '../services/printer_service.dart';
 import '../services/session_service.dart';
@@ -29,6 +30,7 @@ class ReleaseController extends GetxController {
   // Additional helper states
   RxList<PrinterDevice> get scannedPrinters => printerService.availablePrinters;
   RxBool get isScanning => printerService.isScanning;
+  Rx<ReceiptConfigModel> get receiptConfig => printerService.receiptConfig;
 
   @override
   void onInit() {
@@ -150,12 +152,12 @@ class ReleaseController extends GetxController {
 
     if (success) {
       AppHelpers.showSuccess(
-        message: 'Struk order #${order.orderNumber} berhasil dicetak.',
+        message: 'Struk order berhasil dicetak.',
         title: 'Cetak Struk Berhasil',
       );
     } else {
       AppHelpers.showError(
-        message: 'Gagal mencetak struk order #${order.orderNumber}.',
+        message: 'Gagal mencetak struk.',
         title: 'Cetak Struk Gagal',
       );
     }

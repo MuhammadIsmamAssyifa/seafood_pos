@@ -10,7 +10,7 @@ void main() async {
   await GetStorage.init();
 
   // Initialize environment (development by default)
-  EnvConfig.init(environment: AppEnvironment.development);
+  EnvConfig.init(environment: AppEnvironment.production);
 
   runApp(const App());
 }

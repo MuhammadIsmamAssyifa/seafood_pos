@@ -84,11 +84,11 @@ void main() {
     test('Generates ESC/POS Test receipt with proper formatting', () {
       final printerService = PrinterService(isTest: true);
       final receipt58 = printerService.generateTestReceipt(PrinterPaperSize.mm58);
-      expect(receipt58, contains('RESTO SEAFOOD NUSANTARA'));
+      expect(receipt58, contains('SEAFOOD RESTO POS'));
       expect(receipt58, contains('TEST PRINT SUCCESS'));
 
       final receipt80 = printerService.generateTestReceipt(PrinterPaperSize.mm80);
-      expect(receipt80, contains('RESTO SEAFOOD NUSANTARA'));
+      expect(receipt80, contains('SEAFOOD RESTO POS'));
       expect(receipt80.length, greaterThan(receipt58.length));
     });
 
@@ -151,7 +151,7 @@ void main() {
       );
 
       expect(receipt, contains('ORD-20261029-0099'));
-      expect(receipt, contains('Meja 04'));
+      expect(receipt, contains('Meja: 04'));
       expect(receipt, contains('Bapak Hartono'));
       expect(receipt, contains('0.7 kg'));
       expect(receipt, contains('Ikan Bakar Etong'));

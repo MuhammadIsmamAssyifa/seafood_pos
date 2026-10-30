@@ -32,7 +32,7 @@ class EnvConfig {
       case AppEnvironment.staging:
         return 'https://staging-api.seafood.example/api';
       case AppEnvironment.production:
-        return 'https://api.seafood.example/api';
+        return 'https://seafood-pos.duckdns.org/api';
     }
   }
 
@@ -40,7 +40,7 @@ class EnvConfig {
   static Duration get receiveTimeout => const Duration(seconds: 30);
 
   // Pusher Realtime Configuration
-  static String get pusherAppKey => '61bed74b5948299f3626';
+  static String get pusherAppKey => '738c8d688cc19f12cdeb';
   static String get pusherCluster => 'ap1';
   static String get pusherKdsChannel {
     switch (_environment) {

@@ -6,6 +6,10 @@ class ApiEndpoint {
   static const String logout = '/v1/logout';
   static const String logoutAll = '/v1/logout-all';
 
+  // Restaurant & Receipt Settings
+  static const String restaurant = '/v1/restaurant';
+  static const String restaurantInfo = '/v1/restaurant-info';
+
   // Dashboard
   static const String dashboardSummary = '/v1/dashboard/summary';
 

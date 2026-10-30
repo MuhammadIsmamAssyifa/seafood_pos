@@ -6,6 +6,10 @@ import '../../../core/utils/formatter.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../core/widgets/app_loading.dart';
 import '../../release/controllers/release_controller.dart';
+import '../../release/models/receipt_config_model.dart';
+import '../../release/services/printer_service.dart';
+import '../../release/widgets/custom_receipt_dialog.dart';
+import '../../release/widgets/thermal_receipt_widget.dart';
 import '../controllers/history_controller.dart';
 import '../models/history_order_model.dart';
 import '../widgets/adjustment_history_card.dart';
@@ -31,7 +35,16 @@ class HistoryDetailPage extends GetView<HistoryController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Preview Struk Kasir', style: AppTextStyle.h3),
-                IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Get.back()),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.tune_rounded, color: AppColors.primary),
+                      tooltip: 'Kustom Header & Footer',
+                      onPressed: () => CustomReceiptDialog.show(context),
+                    ),
+                    IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Get.back()),
+                  ],
+                ),
               ],
             ),
             const Divider(),
@@ -39,191 +52,38 @@ class HistoryDetailPage extends GetView<HistoryController> {
             // Thermal Paper Receipt Simulator
             Expanded(
               child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFAFAFA),
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(5),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Restaurant Header
-                      const Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'SEAFOOD RESTO POS',
-                              style: TextStyle(
-                                fontFamily: 'monospace',
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Jl. Pelabuhan Ikan No. 88\nTelp: 0812-3456-7890',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.black54),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        '------------------------------------------',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: 'monospace', color: Colors.grey),
-                      ),
-                      const SizedBox(height: 6),
+                child: Obx(() {
+                  final config = Get.isRegistered<PrinterService>()
+                      ? Get.find<PrinterService>().receiptConfig.value
+                      : const ReceiptConfigModel();
 
-                      // Order Meta
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('No: ${order.orderNumber}', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                          Text(order.tableNumber != null ? 'Meja: ${order.tableNumber}' : '-', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Customer: ${order.customerName}', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                          Text('${order.guestCount} Tamu', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                        ],
-                      ),
-                      if (order.createdAt != null)
-                        Text(
-                          'Waktu: ${AppFormatter.formatReceiptDateTime(order.createdAt!)}',
-                          style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.black54),
-                        ),
+                  double change = 0.0;
+                  double? cashReceived;
+                  for (final p in order.payments) {
+                    if (p.changeAmount != null && p.changeAmount! > 0) {
+                      change = p.changeAmount!;
+                    }
+                    if (p.cashReceived != null && p.cashReceived! > 0) {
+                      cashReceived = p.cashReceived;
+                    }
+                  }
 
-                      const SizedBox(height: 6),
-                      const Text(
-                        '------------------------------------------',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: 'monospace', color: Colors.grey),
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Items Table
-                      ...order.items.map((item) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 3.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.displayName,
-                                style: const TextStyle(fontFamily: 'monospace', fontSize: 12, fontWeight: FontWeight.w600),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '  ${AppFormatter.formatQuantity(item.quantity, item.unit)} x ${AppFormatter.formatCurrency(item.price)}',
-                                    style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.black54),
-                                  ),
-                                  Text(
-                                    AppFormatter.formatCurrency(item.subtotal),
-                                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-
-                      const SizedBox(height: 6),
-                      const Text(
-                        '------------------------------------------',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: 'monospace', color: Colors.grey),
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Financial summary
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Subtotal:', style: TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                          Text(AppFormatter.formatCurrency(order.subtotal), style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                        ],
-                      ),
-                      if (order.discount > 0)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Diskon:', style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: Colors.red)),
-                            Text('- ${AppFormatter.formatCurrency(order.discount)}', style: const TextStyle(fontFamily: 'monospace', fontSize: 12, color: Colors.red)),
-                          ],
-                        ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('TOTAL:', style: TextStyle(fontFamily: 'monospace', fontSize: 14, fontWeight: FontWeight.bold)),
-                          Text(AppFormatter.formatCurrency(order.grandTotal), style: const TextStyle(fontFamily: 'monospace', fontSize: 14, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-
-                      const SizedBox(height: 6),
-                      const Text(
-                        '------------------------------------------',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: 'monospace', color: Colors.grey),
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Payments on receipt
-                      ...order.payments.map((p) {
-                        final isCash = p.isCash;
-                        final tendered = p.cashReceived ?? (p.changeAmount != null && p.changeAmount! > 0 ? p.amount + p.changeAmount! : p.amount);
-                        return Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(isCash ? 'Cash (Tunai)' : p.methodLabel, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                                Text(AppFormatter.formatCurrency(isCash ? tendered : p.amount), style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                              ],
-                            ),
-                            if (p.changeAmount != null && p.changeAmount! > 0)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text('Kembalian', style: TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                                    Text(AppFormatter.formatCurrency(p.changeAmount!), style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        );
-                      }),
-
-                      const SizedBox(height: 16),
-                      const Center(
-                        child: Text(
-                          '*** TERIMA KASIH ***\nSelamat Menikmati Hidangan Kami',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontFamily: 'monospace', fontSize: 11, fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                  return ThermalReceiptWidget(
+                    orderNumber: order.orderNumber,
+                    tableNumber: order.tableNumber,
+                    customerName: order.customerName,
+                    guestCount: order.guestCount,
+                    createdAt: order.createdAt,
+                    items: order.items,
+                    subtotal: order.subtotal,
+                    discount: order.discount,
+                    grandTotal: order.grandTotal,
+                    payments: order.payments,
+                    changeAmount: change,
+                    cashReceived: cashReceived,
+                    config: config,
+                  );
+                }),
               ),
             ),
 

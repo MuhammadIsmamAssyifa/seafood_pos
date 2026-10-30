@@ -3,10 +3,13 @@ import 'package:get/get.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
-import '../../../core/utils/formatter.dart';
 import '../../../core/utils/helpers.dart';
 import '../../order/models/order_model.dart';
 import '../../release/controllers/release_controller.dart';
+import '../../release/models/receipt_config_model.dart';
+import '../../release/services/printer_service.dart';
+import '../../release/widgets/custom_receipt_dialog.dart';
+import '../../release/widgets/thermal_receipt_widget.dart';
 import '../models/payment_model.dart';
 import '../models/payment_summary_model.dart';
 
@@ -24,7 +27,6 @@ class PaymentSuccessPage extends StatelessWidget {
     final List<PaymentModel> paymentList = (args?['payments'] as List<PaymentModel>?) ?? [];
 
     final grandTotal = summary?.grandTotal ?? order?.grandTotal ?? 0.0;
-    final totalPaid = summary?.paid ?? grandTotal;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -73,154 +75,43 @@ class PaymentSuccessPage extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Receipt Card Preview
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        // Restaurant Header
-                        Text(
-                          'RESTO SEAFOOD NUSANTARA',
-                          style: AppTextStyle.titleMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Struk Pembayaran Kasir',
-                          style: AppTextStyle.caption.copyWith(color: AppColors.textSecondary),
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(thickness: 1),
-                        const SizedBox(height: 8),
-
-                        // Order Info
-                        _buildReceiptRow('No. Pesanan', order?.orderNumber ?? '-'),
-                        _buildReceiptRow('Meja', 'Meja ${order?.tableNumber ?? '-'}'),
-                        _buildReceiptRow(
-                          'Pelanggan',
-                          order?.customerName?.isNotEmpty == true
-                              ? order!.customerName!
-                              : 'Umum',
-                        ),
-                        _buildReceiptRow(
-                          'Waktu',
-                          AppFormatter.formatReceiptDateTime(order?.createdAt ?? DateTime.now()),
-                        ),
-
-                        const SizedBox(height: 8),
-                        const Divider(thickness: 1),
-                        const SizedBox(height: 8),
-
-                        // Itemized Order Preview
-                        if (order?.items.isNotEmpty == true) ...[
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Rincian Pesanan:',
-                              style: AppTextStyle.caption.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          ...order!.items.map((item) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 2),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        '${AppFormatter.formatQuantity(item.quantity, item.unit)} ${item.variantName}',
-                                        style: AppTextStyle.bodySmall,
-                                      ),
-                                    ),
-                                    Text(
-                                      AppFormatter.formatCurrency(item.subtotal),
-                                      style: AppTextStyle.bodySmall.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
-                          const SizedBox(height: 8),
-                          const Divider(thickness: 1),
-                          const SizedBox(height: 8),
-                        ],
-
-                        // Totals
-                        _buildReceiptRow(
-                          'Total Tagihan',
-                          AppFormatter.formatCurrency(grandTotal),
-                          isBold: true,
-                        ),
-                        _buildReceiptRow(
-                          'Total Dibayar',
-                          AppFormatter.formatCurrency(totalPaid),
-                          isBold: true,
-                          color: Colors.green.shade700,
-                        ),
-
-                        // Payments Breakdown
-                        if (paymentList.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          ...paymentList.map((p) {
-                            if (p.isCash) {
-                              final tendered = p.cashReceived ?? (cashReceived != null && cashReceived > 0 ? cashReceived : (change > 0 ? p.amount + change : p.amount));
-                              return _buildReceiptRow(
-                                '  • Cash (Tunai)',
-                                AppFormatter.formatCurrency(tendered),
-                              );
-                            }
-                            return _buildReceiptRow(
-                              '  • ${p.methodLabel}',
-                              AppFormatter.formatCurrency(p.amount),
-                            );
-                          }),
-                        ] else if (lastPayment != null) ...[
-                          _buildReceiptRow(
-                            'Metode',
-                            lastPayment.isCash
-                                ? 'Cash (Tunai): ${AppFormatter.formatCurrency(lastPayment.cashReceived ?? (cashReceived != null && cashReceived > 0 ? cashReceived : (change > 0 ? lastPayment.amount + change : lastPayment.amount)))}'
-                                : lastPayment.methodLabel,
-                          ),
-                        ],
-
-                        // Change
-                        if (change > 0) ...[
-                          const SizedBox(height: 4),
-                          _buildReceiptRow(
-                            'Kembalian',
-                            AppFormatter.formatCurrency(change),
-                            isBold: true,
-                            color: Colors.amber.shade900,
-                          ),
-                        ],
-
-                        const SizedBox(height: 12),
-                        const Divider(thickness: 1),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Terima Kasih Atas Kunjungan Anda!',
-                          style: AppTextStyle.caption.copyWith(
-                            fontStyle: FontStyle.italic,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Preview Struk Kasir', style: AppTextStyle.h3),
+                    TextButton.icon(
+                      onPressed: () => CustomReceiptDialog.show(context),
+                      icon: const Icon(Icons.tune_rounded, size: 18),
+                      label: const Text('Kustom Struk'),
                     ),
-                  ),
+                  ],
                 ),
+                const SizedBox(height: 8),
+
+                // Receipt Card Preview (Matches exact thermal receipt layout)
+                Obx(() {
+                  final config = Get.isRegistered<PrinterService>()
+                      ? Get.find<PrinterService>().receiptConfig.value
+                      : const ReceiptConfigModel();
+
+                  return ThermalReceiptWidget(
+                    orderNumber: order?.orderNumber ?? '-',
+                    tableNumber: order?.tableNumber,
+                    customerName: order?.customerName,
+                    guestCount: order?.guestCount ?? 1,
+                    createdAt: order?.createdAt ?? DateTime.now(),
+                    items: order?.items ?? const [],
+                    subtotal: order?.subtotal ?? grandTotal,
+                    discount: order?.discount ?? 0.0,
+                    grandTotal: grandTotal,
+                    payments: paymentList.isNotEmpty
+                        ? paymentList
+                        : (lastPayment != null ? [lastPayment] : null),
+                    changeAmount: change,
+                    cashReceived: cashReceived,
+                    config: config,
+                  );
+                }),
 
                 const SizedBox(height: 24),
 
@@ -249,7 +140,7 @@ class PaymentSuccessPage extends StatelessWidget {
                               );
                             } else {
                               AppHelpers.showSuccess(
-                                message: 'Struk order #${order.orderNumber} berhasil dicetak.',
+                                message: 'Struk order berhasil dicetak.',
                               );
                             }
                           } else {
@@ -285,31 +176,6 @@ class PaymentSuccessPage extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildReceiptRow(String label, String value, {bool isBold = false, Color? color}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: AppTextStyle.bodySmall.copyWith(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isBold ? AppColors.textPrimary : AppColors.textSecondary,
-            ),
-          ),
-          Text(
-            value,
-            style: AppTextStyle.bodySmall.copyWith(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: color ?? AppColors.textPrimary,
-            ),
-          ),
-        ],
       ),
     );
   }
