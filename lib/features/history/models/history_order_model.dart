@@ -1,5 +1,6 @@
 import '../../order/models/order_batch_model.dart';
 import '../../order/models/order_item_model.dart';
+import '../../order/models/order_model.dart';
 import '../../order_adjustment/models/adjustment_model.dart';
 import '../../payment/models/payment_model.dart';
 
@@ -47,6 +48,23 @@ class HistoryOrderModel {
       return items.fold(0, (sum, item) => sum + (item.quantity > 0 && item.quantity < 1.0 ? 1 : item.quantity.toInt()));
     }
     return batches.fold(0, (sum, b) => sum + b.itemCount);
+  }
+
+  OrderModel toOrderModel() {
+    return OrderModel(
+      id: id,
+      orderNumber: orderNumber,
+      customerName: customerName,
+      tableNumber: tableNumber,
+      guestCount: guestCount,
+      status: status,
+      subtotal: subtotal,
+      discount: discount,
+      grandTotal: grandTotal,
+      items: items,
+      batches: batches,
+      createdAt: createdAt,
+    );
   }
 
   factory HistoryOrderModel.fromJson(Map<String, dynamic> json) {

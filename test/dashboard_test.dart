@@ -136,7 +136,7 @@ void main() {
   });
 
   group('Sprint 03 - UI Widgets Tests', () {
-    testWidgets('DashboardHeader renders outlet name and buttons', (tester) async {
+    testWidgets('DashboardHeader renders outlet name and connectivity badge', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
@@ -147,8 +147,7 @@ void main() {
       );
 
       expect(find.text('Seafood Restaurant'), findsOneWidget);
-      expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.logout_rounded), findsOneWidget);
+      expect(find.textContaining('Cabang Utama'), findsOneWidget);
     });
 
     testWidgets('UserCard displays cashier name and role badge', (tester) async {
@@ -200,6 +199,35 @@ void main() {
 
       await tester.tap(find.text('Daftar Meja'));
       expect(tapped, isTrue);
+    });
+
+    testWidgets('MenuCard does not overflow even in tight constraints', (tester) async {
+      const item = DashboardMenuItem(
+        id: 'settings',
+        title: 'Pengaturan',
+        subtitle: 'Profil, printer thermal & logout',
+        icon: Icons.settings_rounded,
+        color: Colors.blue,
+        route: '/settings',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 157,
+                height: 124, // inner padding constraint ~125x92
+                child: MenuCard(item: item, onTap: () {}),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Pengaturan'), findsOneWidget);
     });
 
     testWidgets('LogoutDialog triggers confirm callback', (tester) async {

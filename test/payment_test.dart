@@ -12,7 +12,6 @@ import 'package:seafood_pos/features/payment/models/payment_model.dart';
 import 'package:seafood_pos/features/payment/models/payment_summary_model.dart';
 import 'package:seafood_pos/features/payment/repositories/payment_repository.dart';
 import 'package:seafood_pos/features/payment/widgets/payment_history.dart';
-import 'package:seafood_pos/features/payment/widgets/payment_input.dart';
 import 'package:seafood_pos/features/payment/widgets/payment_method_button.dart';
 import 'package:seafood_pos/features/payment/widgets/payment_summary_card.dart';
 import 'package:seafood_pos/features/payment/widgets/remaining_amount_card.dart';
@@ -49,6 +48,8 @@ class FakePaymentRepository extends PaymentRepository {
     required int orderId,
     required String method,
     required double amount,
+    double? cashReceived,
+    double? changeAmount,
   }) async {
     createPaymentCount++;
     if (!shouldSucceed) {
@@ -61,6 +62,8 @@ class FakePaymentRepository extends PaymentRepository {
       method: method,
       status: 'paid',
       amount: amount,
+      cashReceived: cashReceived,
+      changeAmount: changeAmount,
       createdAt: DateTime.now(),
     );
 

@@ -197,15 +197,21 @@ class PaymentController extends GetxController {
 
     isSubmitting.value = true;
     try {
+      final double? cashTendered = selectedMethod.value == 'cash' && cashReceived.value > 0
+          ? cashReceived.value
+          : null;
+      final double change = changeAmount;
+
       final res = await paymentRepository.createPayment(
         orderId: id,
         method: selectedMethod.value,
         amount: toPay,
+        cashReceived: cashTendered,
+        changeAmount: change > 0 ? change : null,
       );
 
       if (res.success) {
         final lastPayment = res.data;
-        final change = changeAmount;
 
         // Reload fresh summary and history
         await loadPaymentData(id);
@@ -213,12 +219,13 @@ class PaymentController extends GetxController {
         if (isPaid) {
           // Full payment completed -> Navigate to receipt/success page
           Get.offNamed(
-            AppRoutes.PAYMENT + '/success',
+            '${AppRoutes.PAYMENT}/success',
             arguments: {
               'order': order.value,
               'summary': summary.value,
               'lastPayment': lastPayment,
               'change': change,
+              'cashReceived': cashTendered ?? (change > 0 ? toPay + change : toPay),
               'payments': payments.toList(),
             },
           );

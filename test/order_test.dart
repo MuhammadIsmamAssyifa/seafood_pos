@@ -319,6 +319,7 @@ void main() {
         ),
       );
 
+      expect(searched, equals(''));
       expect(find.text('ikan'), findsOneWidget);
       expect(find.byIcon(Icons.clear_rounded), findsOneWidget);
 

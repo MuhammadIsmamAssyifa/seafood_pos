@@ -3,10 +3,11 @@ import 'package:get/get.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
 import '../../../core/widgets/app_loading.dart';
+import '../../release/controllers/release_controller.dart';
+import '../../release/widgets/offline_banner.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/menu_card.dart';
-import '../widgets/user_card.dart';
 
 class DashboardPage extends GetView<DashboardController> {
   const DashboardPage({super.key});
@@ -20,6 +21,18 @@ class DashboardPage extends GetView<DashboardController> {
           children: [
             // Top Dashboard Header
             DashboardHeader(controller: controller),
+
+            // Offline Connectivity Banner
+            if (Get.isRegistered<ReleaseController>())
+              Obx(() {
+                final releaseCtrl = Get.find<ReleaseController>();
+                if (!releaseCtrl.isConnected.value) {
+                  return OfflineBanner(
+                    onRetry: () => releaseCtrl.refreshAll(),
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
 
             // Content Area
             Expanded(
@@ -37,13 +50,6 @@ class DashboardPage extends GetView<DashboardController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // User & Outlet Information Card
-                        UserCard(
-                          user: controller.user.value,
-                          outlet: controller.outlet.value,
-                        ),
-                        const SizedBox(height: 24),
-
                         // Section Title
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -68,7 +74,7 @@ class DashboardPage extends GetView<DashboardController> {
                             maxCrossAxisExtent: 220,
                             crossAxisSpacing: 14,
                             mainAxisSpacing: 14,
-                            childAspectRatio: 1.25,
+                            mainAxisExtent: 135,
                           ),
                           itemCount: controller.menuList.length,
                           itemBuilder: (context, index) {

@@ -18,4 +18,5 @@ abstract class AppRoutes {
   static const INVENTORY = '/inventory';
   static const REPORT = '/report';
   static const REPORT_SALES_DETAIL = '/report/sales-detail';
+  static const PRINTER_SETTINGS = '/settings/printer';
 }

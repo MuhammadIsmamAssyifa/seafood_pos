@@ -24,10 +24,9 @@ class MenuCard extends StatelessWidget {
         splashColor: item.color.withAlpha(20),
         highlightColor: item.color.withAlpha(10),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Top Row: Icon Container + Optional Badge
               Row(
@@ -35,15 +34,15 @@ class MenuCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
                       color: item.color.withAlpha(25),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       item.icon,
-                      size: 26,
+                      size: 24,
                       color: item.color,
                     ),
                   ),
@@ -67,6 +66,8 @@ class MenuCard extends StatelessWidget {
                 ],
               ),
 
+              const Spacer(),
+
               // Bottom Section: Title & Subtitle
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,15 +78,18 @@ class MenuCard extends StatelessWidget {
                     style: AppTextStyle.titleMedium.copyWith(
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.2,
+                      fontSize: 14.5,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     item.subtitle,
                     style: AppTextStyle.caption.copyWith(
                       color: AppColors.textSecondary,
+                      fontSize: 11,
+                      height: 1.2,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -99,4 +103,3 @@ class MenuCard extends StatelessWidget {
     );
   }
 }
-

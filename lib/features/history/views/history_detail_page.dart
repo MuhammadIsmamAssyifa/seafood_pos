@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_text_style.dart';
 import '../../../core/utils/formatter.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../core/widgets/app_loading.dart';
+import '../../release/controllers/release_controller.dart';
 import '../controllers/history_controller.dart';
 import '../models/history_order_model.dart';
 import '../widgets/adjustment_history_card.dart';
@@ -101,7 +103,7 @@ class HistoryDetailPage extends GetView<HistoryController> {
                       ),
                       if (order.createdAt != null)
                         Text(
-                          'Waktu: ${AppFormatter.formatDateTime(order.createdAt!)}',
+                          'Waktu: ${AppFormatter.formatReceiptDateTime(order.createdAt!)}',
                           style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.black54),
                         ),
 
@@ -185,11 +187,28 @@ class HistoryDetailPage extends GetView<HistoryController> {
 
                       // Payments on receipt
                       ...order.payments.map((p) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        final isCash = p.isCash;
+                        final tendered = p.cashReceived ?? (p.changeAmount != null && p.changeAmount! > 0 ? p.amount + p.changeAmount! : p.amount);
+                        return Column(
                           children: [
-                            Text(p.methodLabel, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-                            Text(AppFormatter.formatCurrency(p.amount), style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(isCash ? 'Cash (Tunai)' : p.methodLabel, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+                                Text(AppFormatter.formatCurrency(isCash ? tendered : p.amount), style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+                              ],
+                            ),
+                            if (p.changeAmount != null && p.changeAmount! > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text('Kembalian', style: TextStyle(fontFamily: 'monospace', fontSize: 12)),
+                                    Text(AppFormatter.formatCurrency(p.changeAmount!), style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+                                  ],
+                                ),
+                              ),
                           ],
                         );
                       }),
@@ -215,19 +234,38 @@ class HistoryDetailPage extends GetView<HistoryController> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(48),
+                minimumSize: const Size(0, 48),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () {
                 Get.back();
-                Get.snackbar(
-                  'Cetak Struk',
-                  'Perintah cetak struk untuk ${order.orderNumber} telah dikirim ke printer kasir.',
-                  snackPosition: SnackPosition.BOTTOM,
-                );
+                double change = 0.0;
+                double? cashReceived;
+                for (final p in order.payments) {
+                  if (p.changeAmount != null && p.changeAmount! > 0) {
+                    change = p.changeAmount!;
+                  }
+                  if (p.cashReceived != null && p.cashReceived! > 0) {
+                    cashReceived = p.cashReceived;
+                  }
+                }
+
+                if (Get.isRegistered<ReleaseController>()) {
+                  Get.find<ReleaseController>().printReceipt(
+                    order.toOrderModel(),
+                    payments: order.payments,
+                    change: change,
+                    cashReceived: cashReceived,
+                  );
+                } else {
+                  AppHelpers.showSuccess(
+                    message: 'Perintah cetak ulang struk ${order.orderNumber} telah dikirim ke printer kasir.',
+                    title: 'Cetak Ulang Struk',
+                  );
+                }
               },
               icon: const Icon(Icons.print_rounded),
-              label: const Text('Cetak Struk (Reprint)'),
+              label: const Text('Cetak Struk'),
             ),
           ],
         ),
@@ -463,12 +501,12 @@ class HistoryDetailPage extends GetView<HistoryController> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(50),
+                  minimumSize: const Size(0, 50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () => _showReceiptModal(context, order),
                 icon: const Icon(Icons.receipt_long_rounded),
-                label: const Text('Lihat & Cetak Ulang Struk (Reprint)'),
+                label: const Text('Lihat & Cetak Ulang Struk'),
               ),
             ],
           ),

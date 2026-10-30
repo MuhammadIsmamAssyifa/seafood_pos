@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:logger/logger.dart';
+import '../../features/release/services/session_service.dart';
 import '../config/env_config.dart';
 import '../storage/secure_storage.dart';
 import 'api_exception.dart';
@@ -60,6 +62,9 @@ class DioClient {
             // Clear expired token & session
             await storageService.deleteToken();
             await storageService.clearAll();
+            if (Get.isRegistered<SessionService>()) {
+              Get.find<SessionService>().handleSessionExpired();
+            }
           }
 
           final apiException = ApiException.fromDioException(error);

@@ -12,6 +12,7 @@ import '../../features/history/views/history_page.dart';
 import '../../features/inventory/bindings/inventory_binding.dart';
 import '../../features/inventory/views/stock_information_page.dart';
 import '../../features/kitchen/views/kitchen_page.dart';
+import '../../features/menu/bindings/menu_binding.dart';
 import '../../features/menu/views/menu_page.dart';
 import '../../features/order/bindings/order_binding.dart';
 import '../../features/order/views/order_page.dart';
@@ -22,6 +23,8 @@ import '../../features/payment/bindings/payment_binding.dart';
 import '../../features/payment/views/payment_page.dart';
 import '../../features/payment/views/payment_success_page.dart';
 import '../../features/profile/views/profile_page.dart';
+import '../../features/release/bindings/release_binding.dart';
+import '../../features/release/views/printer_settings_page.dart';
 import '../../features/report/bindings/report_binding.dart';
 import '../../features/report/views/report_page.dart';
 import '../../features/report/views/sales_detail_page.dart';
@@ -85,6 +88,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.MENU,
       page: () => const MenuPage(),
+      binding: MenuBinding(),
       middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),
@@ -145,6 +149,13 @@ class AppPages {
       name: AppRoutes.REPORT_SALES_DETAIL,
       page: () => const SalesDetailPage(),
       binding: ReportBinding(),
+      middlewares: [AuthGuard()],
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.PRINTER_SETTINGS,
+      page: () => const PrinterSettingsPage(),
+      binding: ReleaseBinding(),
       middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),

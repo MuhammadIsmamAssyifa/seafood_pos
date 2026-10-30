@@ -26,13 +26,23 @@ class PaymentRepository {
     required int orderId,
     required String method,
     required double amount,
+    double? cashReceived,
+    double? changeAmount,
   }) async {
+    final Map<String, dynamic> body = {
+      'method': method,
+      'amount': amount,
+    };
+    if (cashReceived != null && cashReceived > 0) {
+      body['cash_received'] = cashReceived;
+    }
+    if (changeAmount != null && changeAmount > 0) {
+      body['change_amount'] = changeAmount;
+    }
+
     final response = await dioClient.post(
       ApiEndpoint.orderPayments(orderId),
-      data: {
-        'method': method,
-        'amount': amount,
-      },
+      data: body,
     );
 
     final responseData = response.data as Map<String, dynamic>;

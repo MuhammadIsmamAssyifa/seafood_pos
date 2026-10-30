@@ -6,6 +6,7 @@ import '../../../app/theme/app_text_style.dart';
 import '../../../core/utils/formatter.dart';
 import '../../../core/utils/helpers.dart';
 import '../../order/models/order_model.dart';
+import '../../release/controllers/release_controller.dart';
 import '../models/payment_model.dart';
 import '../models/payment_summary_model.dart';
 
@@ -19,6 +20,7 @@ class PaymentSuccessPage extends StatelessWidget {
     final PaymentSummaryModel? summary = args?['summary'] as PaymentSummaryModel?;
     final PaymentModel? lastPayment = args?['lastPayment'] as PaymentModel?;
     final double change = (args?['change'] as num?)?.toDouble() ?? 0.0;
+    final double? cashReceived = (args?['cashReceived'] as num?)?.toDouble();
     final List<PaymentModel> paymentList = (args?['payments'] as List<PaymentModel>?) ?? [];
 
     final grandTotal = summary?.grandTotal ?? order?.grandTotal ?? 0.0;
@@ -62,7 +64,9 @@ class PaymentSuccessPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Order berhasil dilunasi dan status order telah selesai.',
+                  order?.isCompleted == true
+                      ? 'Order berhasil dilunasi dan status order telah selesai.'
+                      : 'Pembayaran lunas! Pesanan sedang diproses di dapur.',
                   textAlign: TextAlign.center,
                   style: AppTextStyle.bodyMedium.copyWith(color: AppColors.textSecondary),
                 ),
@@ -110,7 +114,7 @@ class PaymentSuccessPage extends StatelessWidget {
                         ),
                         _buildReceiptRow(
                           'Waktu',
-                          AppFormatter.formatDateTime(DateTime.now()),
+                          AppFormatter.formatReceiptDateTime(order?.createdAt ?? DateTime.now()),
                         ),
 
                         const SizedBox(height: 8),
@@ -170,14 +174,25 @@ class PaymentSuccessPage extends StatelessWidget {
                         // Payments Breakdown
                         if (paymentList.isNotEmpty) ...[
                           const SizedBox(height: 6),
-                          ...paymentList.map((p) => _buildReceiptRow(
-                                '  • ${p.methodLabel}',
-                                AppFormatter.formatCurrency(p.amount),
-                              )),
+                          ...paymentList.map((p) {
+                            if (p.isCash) {
+                              final tendered = p.cashReceived ?? (cashReceived != null && cashReceived > 0 ? cashReceived : (change > 0 ? p.amount + change : p.amount));
+                              return _buildReceiptRow(
+                                '  • Cash (Tunai)',
+                                AppFormatter.formatCurrency(tendered),
+                              );
+                            }
+                            return _buildReceiptRow(
+                              '  • ${p.methodLabel}',
+                              AppFormatter.formatCurrency(p.amount),
+                            );
+                          }),
                         ] else if (lastPayment != null) ...[
                           _buildReceiptRow(
                             'Metode',
-                            lastPayment.methodLabel,
+                            lastPayment.isCash
+                                ? 'Cash (Tunai): ${AppFormatter.formatCurrency(lastPayment.cashReceived ?? (cashReceived != null && cashReceived > 0 ? cashReceived : (change > 0 ? lastPayment.amount + change : lastPayment.amount)))}'
+                                : lastPayment.methodLabel,
                           ),
                         ],
 
@@ -212,7 +227,7 @@ class PaymentSuccessPage extends StatelessWidget {
                 // Actions
                 Row(
                   children: [
-                    // Print Receipt Simulation
+                    // Print Receipt
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
@@ -223,9 +238,23 @@ class PaymentSuccessPage extends StatelessWidget {
                           side: BorderSide(color: AppColors.primary),
                         ),
                         onPressed: () {
-                          AppHelpers.showSuccess(
-                            message: 'Simulasi cetak struk: Struk terkirim ke printer thermal.',
-                          );
+                          if (order != null) {
+                            if (Get.isRegistered<ReleaseController>()) {
+                              Get.find<ReleaseController>().printReceipt(
+                                order,
+                                summary: summary,
+                                payments: paymentList,
+                                change: change,
+                                cashReceived: cashReceived,
+                              );
+                            } else {
+                              AppHelpers.showSuccess(
+                                message: 'Struk order #${order.orderNumber} berhasil dicetak.',
+                              );
+                            }
+                          } else {
+                            AppHelpers.showWarning(message: 'Data order tidak ditemukan untuk dicetak.');
+                          }
                         },
                         icon: const Icon(Icons.print_rounded, size: 20),
                         label: const Text('Cetak Struk'),

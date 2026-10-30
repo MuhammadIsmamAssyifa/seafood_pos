@@ -130,6 +130,14 @@ class PaymentHistoryCard extends StatelessWidget {
                           timeStr,
                           style: AppTextStyle.caption.copyWith(color: AppColors.textMuted),
                         ),
+                        if (isCash && ((p.cashReceived != null && p.cashReceived! > p.amount) || (p.changeAmount != null && p.changeAmount! > 0)))
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2.0),
+                            child: Text(
+                              'Diterima: ${AppFormatter.formatCurrency(p.cashReceived ?? (p.amount + (p.changeAmount ?? 0)))} • Kembali: ${AppFormatter.formatCurrency(p.changeAmount ?? 0)}',
+                              style: AppTextStyle.caption.copyWith(color: Colors.green.shade700, fontWeight: FontWeight.w600),
+                            ),
+                          ),
                       ],
                     ),
                   ),

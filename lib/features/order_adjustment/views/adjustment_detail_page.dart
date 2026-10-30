@@ -280,7 +280,7 @@ class AdjustmentDetailPage extends GetView<OrderAdjustmentController> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(48),
+                        minimumSize: const Size(0, 48),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: isBusy
@@ -299,7 +299,7 @@ class AdjustmentDetailPage extends GetView<OrderAdjustmentController> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.error,
                         side: const BorderSide(color: AppColors.error),
-                        minimumSize: const Size.fromHeight(48),
+                        minimumSize: const Size(0, 48),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: isBusy

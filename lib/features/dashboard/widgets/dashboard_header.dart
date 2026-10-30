@@ -101,20 +101,6 @@ class DashboardHeader extends StatelessWidget {
               ),
             );
           }),
-
-          // Refresh Button
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
-            tooltip: 'Segarkan Data',
-            onPressed: () => controller.loadDashboardData(),
-          ),
-
-          // Logout Button
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppColors.error),
-            tooltip: 'Logout',
-            onPressed: () => controller.showLogoutDialog(context),
-          ),
         ],
       ),
     );

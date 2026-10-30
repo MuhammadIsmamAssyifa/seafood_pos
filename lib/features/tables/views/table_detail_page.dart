@@ -105,6 +105,26 @@ class TableDetailPage extends StatelessWidget {
                   );
                 },
               ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  minimumSize: const Size(0, 48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.payment_rounded, size: 20),
+                label: const Text(
+                  'Bayar Langsung (Kasir)',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                onPressed: () {
+                  Get.toNamed(
+                    AppRoutes.PAYMENT,
+                    arguments: active.id,
+                  );
+                },
+              ),
             ] else ...[
               Card(
                 child: Padding(

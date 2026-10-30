@@ -9,6 +9,7 @@ class AppFormatter {
 
   static final DateFormat _dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
   static final DateFormat _dateTimeFormat = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
+  static final DateFormat _receiptDateFormat = DateFormat('dd/MM/yyyy HH:mm');
   static final DateFormat _timeFormat = DateFormat('HH:mm', 'id_ID');
 
   /// Format number to Indonesian Rupiah currency string, e.g. Rp 50.000
@@ -47,6 +48,16 @@ class AppFormatter {
       return _dateTimeFormat.format(dateTime);
     } catch (_) {
       return dateTime.toString();
+    }
+  }
+
+  /// Format DateTime concisely for thermal receipts, e.g. '30/10/2026 15:45'
+  static String formatReceiptDateTime(DateTime? dateTime) {
+    final dt = dateTime ?? DateTime.now();
+    try {
+      return _receiptDateFormat.format(dt);
+    } catch (_) {
+      return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     }
   }
 

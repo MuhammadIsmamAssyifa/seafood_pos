@@ -42,7 +42,6 @@ class DashboardController extends GetxController {
         icon: Icons.add_shopping_cart_rounded,
         color: AppColors.primary,
         route: AppRoutes.ORDER,
-        badge: 'Utama',
       ),
       const DashboardMenuItem(
         id: 'tables',
@@ -51,7 +50,6 @@ class DashboardController extends GetxController {
         icon: Icons.table_restaurant_rounded,
         color: Color(0xFF0284C7), // Sky Blue
         route: AppRoutes.TABLES,
-        badge: 'Sprint 04',
       ),
       const DashboardMenuItem(
         id: 'history',
@@ -60,25 +58,14 @@ class DashboardController extends GetxController {
         icon: Icons.receipt_long_rounded,
         color: Color(0xFF0D9488), // Teal
         route: AppRoutes.HISTORY,
-        badge: 'Sprint 09',
       ),
       const DashboardMenuItem(
         id: 'menu',
         title: 'Katalog Menu',
-        subtitle: 'Daftar hidangan & harga',
+        subtitle: 'Daftar menu & info stok',
         icon: Icons.restaurant_menu_rounded,
         color: Color(0xFFD97706), // Amber
         route: AppRoutes.MENU,
-        badge: 'Sprint 06',
-      ),
-      const DashboardMenuItem(
-        id: 'kitchen',
-        title: 'Dapur (KDS)',
-        subtitle: 'Monitor antrean pesanan',
-        icon: Icons.kitchen_rounded,
-        color: Color(0xFF7C3AED), // Purple
-        route: AppRoutes.KITCHEN,
-        badge: 'KDS',
       ),
       const DashboardMenuItem(
         id: 'adjustment',
@@ -87,16 +74,6 @@ class DashboardController extends GetxController {
         icon: Icons.rule_rounded,
         color: Color(0xFFE11D48), // Rose
         route: AppRoutes.ADJUSTMENT,
-        badge: 'Sprint 08',
-      ),
-      const DashboardMenuItem(
-        id: 'inventory',
-        title: 'Informasi Stok',
-        subtitle: 'Ketersediaan bahan & pasar',
-        icon: Icons.inventory_2_rounded,
-        color: Color(0xFF059669), // Emerald
-        route: AppRoutes.INVENTORY,
-        badge: 'Sprint 10',
       ),
       const DashboardMenuItem(
         id: 'report',
@@ -105,13 +82,12 @@ class DashboardController extends GetxController {
         icon: Icons.bar_chart_rounded,
         color: Color(0xFF2563EB), // Royal Blue
         route: AppRoutes.REPORT,
-        badge: 'Sprint 11',
       ),
       const DashboardMenuItem(
         id: 'profile',
-        title: 'Profil Kasir',
-        subtitle: 'Informasi akun & shift',
-        icon: Icons.account_circle_rounded,
+        title: 'Pengaturan',
+        subtitle: 'Profil, printer thermal & logout',
+        icon: Icons.settings_rounded,
         color: Color(0xFF475569), // Slate
         route: AppRoutes.PROFILE,
       ),

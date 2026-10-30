@@ -25,7 +25,7 @@ class SubmitBatchButton extends StatelessWidget {
         backgroundColor: AppColors.secondary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        minimumSize: const Size(double.infinity, 48),
+        minimumSize: const Size(0, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 1,
       ),
